@@ -1,0 +1,59 @@
+#edit-mode: -*- python -*-
+#coding:gbk
+
+WORKROOT('../../../')
+
+#platform, if not write PLATFORM('xxx') in BCLOUD file, default is 'redhat4u3'
+PLATFORM('centos4u3')
+
+#gcc version, default 'gcc'
+COMPILER('gcc482')
+
+#Preprocessor flags.
+#CPPFLAGS(r'-D_GNU_SOURCE -D__STDC_LIMIT_MACROS')
+CPPFLAGS(r'-DVERSION=\"%s\"' % SVN_LAST_CHANGED_REV())
+
+#C flags.
+#CFLAGS('-g -pipe -W -Wall -fPIC')
+
+#C++ flags.
+CXXFLAGS('-g -pipe -W -Wall -fPIC -std=c++11')
+
+#IDL flags.
+#IDLFLAGS('--compack')
+
+#UBRPC flags.
+#UBRPCFLAGS('--compack')
+
+#-I path
+#INCPATHS('. ./include $OUT/include')
+#INCPATHS('../../../')
+
+#libs which need to link with
+#LIBS('$OUT/lib/libC++-id-13873.a')
+#LIBS('$OUT/so/libC++-id-13873.so')
+
+#link flags
+LDFLAGS('-lpthread -lcrypto -lrt -ldl -lssl -lz')
+
+#CONFIGS("lib2-64/ullib@base")
+CONFIGS("baidu/base/ullib@stable")
+CONFIGS('public/baidu-rpc@ci-base')
+CONFIGS('baidu/third-party/rapidjson1-1@master@git_branch')
+
+user_sources=GLOB("stringParse/src/*.cpp stringParse/*.cpp")
+INCPATHS('stringParse')
+#release files except headers
+OUTPUT('conf/*', '$OUT/conf/')
+
+CONFIGS('com/btest/gtest@gtest_1-1-1-0_PD_BL')
+LDFLAGS('-lpthread -lcrypto -lrt')
+UTApplication('fc_ut', Sources(GLOB('unittest/*.cpp')), UTArgs(''), UTOnServer(False))
+#UT
+#UTApplication('C++-id-13873', Sources(user_sources), UTArgs(''), UTOnServer(False))
+
+#.a
+StaticLibrary('test', Sources(user_sources))
+#HEADERS('stringParse/include/*.h', '$INC/test')
+
+Application('main',Sources(user_sources))
