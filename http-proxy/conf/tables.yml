@@ -1,0 +1,331 @@
+# keys 默认字段
+## foreign_tables: None
+## tarname: {name}  # 目标名称
+## beindex: false #是否为索引
+## bebuild: true  #是否为建库
+## beseg: true    #是否切词
+# table默认字段
+## tarname: '' #目标名称，默认为空字符串
+
+tables:
+  # 患者管理表
+  - doctype: 8
+    typename: patient
+    subtables:
+    # patient表
+    - name: patient
+      db: case_history
+      source: mysql
+      prikey: patient_id
+      keys:
+      - name: patient_id
+        foreign_tables:
+        - name: disease_course
+          forkey: patient_id
+        - name: patient_manager_dossier_tag
+          forkey: patient_id
+        - name: camera_media_tag
+          forkey: patient_id
+        - name: camera_media_group
+          forkey: patient_id
+      - name: name
+        beindex: true 
+        granularity: 3
+      - name: folder_id
+        beindex: true
+        isfilter: 1
+      - name: create_time
+      - name: update_time
+      - name: name_order
+      - name: gender
+      - name: birthday
+      - name: age
+      - name: outpatient_number
+        beindex: true
+        granularity: 3
+      - name: hospital_number
+        beindex: true
+        granularity: 3
+      - name: bed_number
+        beindex: true
+        granularity: 3
+      - name: id_type
+      - name: id_num
+        tarname: id_number
+      - name: province_code
+      - name: province_name
+      - name: city_code
+      - name: city_name
+      - name: tellphone
+      - name: selfphone
+      - name: familyphone
+      - name: description
+        beindex: true
+      - name: patient_weight
+      - name: patient_height
+      - name: bmi
+
+    # disease_course表
+    - name: disease_course
+      db: case_history
+      source: mysql
+      prikey: disease_course_id
+      tarname: disease_courses
+      keys:
+      - name: patient_id
+        bebuild: false
+      - name: disease_course_id
+        tarname: id
+        foreign_tables:
+        - name: diagnosis
+          forkey: disease_course_id
+        - name: disease_course_operation
+          forkey: disease_course_id
+      - name: came_hospital_date
+      - name: type_uuid
+        bebuild: false
+        foreign_tables:
+        - name: disease_course_type
+          forkey: type_uuid
+      - name: status_uuid
+        bebuild: false
+        foreign_tables:
+        - name: diagnosis_status
+          forkey: status_uuid
+      - name: doctor_id
+      - name: doctor_name
+        beindex: true
+      - name: came_hospital_date
+      - name: leave_hospital_date
+      - name: outpatient_service_date
+      - name: create_time
+
+    # 诊断表
+    - name: diagnosis
+      db: case_history
+      source: mysql
+      prikey: disease_course_id
+      tarname: diagnosis
+      keys:
+      - name: disease_course_id
+        bebuild: false
+        foreign_tables:
+        - name: patientManagerFormDataDetailPlus
+          forkey: diseaseCourseId
+      - name: diagnosis_id
+        tarname: id
+        foreign_tables:
+        - name: diagnosis_part_side
+          forkey: diagnosis_id
+      - name: main_diagnosis
+      - name: disease_uuid
+        bebuild: false
+        foreign_tables:
+        - name: patientManagerFormDataDetailPlus
+          forkey: diseaseUuid
+      - name: disease_name
+        tarname: name
+        beindex: true
+      - name: create_time
+
+    # 病程手术表
+    - name: disease_course_operation
+      db: case_history
+      source: mysql
+      prikey: disease_course_id
+      tarname: operations
+      keys:
+      - name: disease_course_id
+      - name: operation_uuid
+        tarname: id
+      - name: operation_name
+        beindex: true
+        tarname: name
+      - name: create_time
+
+    # 标签表
+    - name: patient_manager_dossier_tag
+      db: case_history
+      source: mysql
+      prikey: patient_id
+      tarname: tags
+      keys:
+      - name: patient_id
+        bebuild: false
+      - name: tag_name
+        beindex: true
+        tarname: ''
+
+    # 部位侧别表
+    - name: diagnosis_part_side
+      db: case_history
+      source: mysql
+      prikey: diagnosis_id
+      keys:
+      - name: diagnosis_id
+        bebuild: false
+      - name: disease_part_name
+        beindex: true
+        tarname: part_name
+        #islist: true
+      - name: disease_side_name
+        beindex: true
+        tarname: side_name
+        #islist: true
+
+    # 病程类型表
+    - name: disease_course_type
+      db: patient_management
+      source: mysql
+      prikey: type_uuid
+      keys:
+      - name: type_uuid
+        bebuild: false
+      - name: type_name
+        beindex: true
+        tarname: name
+
+    # 诊疗状态表
+    - name: diagnosis_status
+      db: patient_management
+      source: mysql
+      prikey: status_uuid
+      keys:
+      - name: type_uuid
+        bebuild: false
+      - name: status_name
+        beindex: true
+        tarname: status
+
+    # 骨医相机标签表
+    - name: camera_media_tag
+      db: case_history
+      source: mysql
+      prikey: patient_id
+      tarname: text_tags
+      keys:
+      - name: patient_id
+        bebuild: false
+      - name: tag_content
+        beindex: true
+        tarname: ''
+
+    # 组表
+    - name: camera_media_group
+      db: case_history
+      source: mysql
+      prikey: patient_id
+      keys:
+      - name: id
+        bebuild: false
+        foreign_tables:
+        - name: camera_media_group_note
+          forkey: media_group_id
+      - name: patient_id
+        bebuild: false
+          
+    # 骨医相机笔记表:
+    - name: camera_media_group_note
+      db: case_history
+      source: mysql
+      prikey: media_group_id
+      tarname: text_contents
+      keys:
+      - name: media_group_id
+        bebuild: false
+      - name: text_content
+        beindex: true
+        tarname: ''
+
+    # 患者管理表单数据表
+    - name: patientManagerFormDataDetailPlus
+      prikey: diseaseCourseId
+      source: mongo
+      db: dossier
+      keys:
+      - name: diseaseCourseId
+        bebuild: false
+      - name: diseaseUuid
+        bebuild: false
+      - name: forms
+        bebuild: false
+        foreign_tables:
+        - name: patientManagerFormDataDetailPlus.forms
+    # 患者管理子级路径
+    - name: patientManagerFormDataDetailPlus.forms
+      source: mongo
+      db: dossier
+      tarname: forms
+      keys:
+      - name: formId
+        tarname: id
+        foreign_tables:
+        - name: form
+          forkey: _id
+      - name: formName
+        beindex: true
+        tarname: name
+      - name: data
+        bebuild: false
+        foreign_tables:
+        - name: forms.data
+    # 患者管理子级路径
+    - name: forms.data
+      source: mongo
+      db: dossier
+      tarname: items
+      keys:
+      - name: id
+        scope: __KEYS__
+        foreign_tables:
+        - name: group.items
+          forkey: itemCode
+      - name: value
+        scope: __VALUES__
+        bebuild: false
+        foreign_tables:
+        - name: data.value
+    # 患者管理子级路径
+    - name: data.value
+      source: mongo
+      db: dossier
+      tarname: value
+      keys:
+      - name: value
+        tarname: ''
+        scope: __VALUES__
+        beindex: true
+
+    # 表单表
+    - name: form
+      source: mongo
+      db: dossier
+      keys:
+      - name: _id
+        bebuild: false
+      - name: groups
+        bebuild: false
+        foreign_tables:
+        - name: form.groups
+    # 表单子级路径
+    - name: form.groups
+      source: mongo
+      db: dossier
+      keys:
+      - name: items
+        bebuild: false
+        foreign_tables:
+        - name: group.items
+    # 表单子级路径
+    - name: group.items
+      source: mongo
+      db: dossier
+      keys:
+      - name: itemCode
+        bebuild: false
+      - name: itemName
+        tarname: name
+      - name: nextItems
+        bebuild: false
+        foreign_tables:
+        - name: group.items

@@ -1,0 +1,7 @@
+dependencies:
+  - role: docker-server/pull-one
+    vars:
+      docker_register: "{{ docker.register }}"
+      docker_image:
+        name: "{{ docker.register.ip }}/{{ docker.image }}"
+        tag: "{{ docker.tag }}"

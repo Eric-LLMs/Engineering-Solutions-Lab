@@ -1,0 +1,4 @@
+*.[ao]
+output
+*.pb.h
+*_pb2*

@@ -1,0 +1,51 @@
+# 更新 exporter
+---
+
+- name: update exporters
+  gather_facts: false
+  hosts: http_proxy_2_{{ cluster }}
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # 配置exporter
+    - name: config exporters
+      include_role:
+        name: "{{ pwd }}/build/roles/deploy-exporter"
+      vars:
+        ansible_port: "{{ ssh_port }}"
+
+- name: clear from prometheus
+  gather_facts: false
+  hosts: http_proxy_2_{{ cluster }}[0]
+  tasks:
+    # 从prometheus注销
+    - name: clear from prometheus
+      include_role:
+        name: common-service/clear-from-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-tcp
+        - service-node
+        - service-grok
+        - service-process
+      loop_control:
+        loop_var: sd_prefix
+
+- name: update exporters
+  gather_facts: false
+  hosts: http_proxy_2_{{ cluster }}
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # 注册到prometheus
+    - name: register to prometheus
+      include_role:
+        name: common-service/register-to-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-tcp
+        - service-node
+        - service-grok
+        - service-process
+      loop_control:
+        loop_var: sd_prefix

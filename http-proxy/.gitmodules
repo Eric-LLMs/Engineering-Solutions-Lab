@@ -1,0 +1,9 @@
+[submodule "app/interfaces/urs"]
+	path = app/interfaces/urs
+	url = git@192.168.1.78:model-services/urs_interface.git
+[submodule "app/interfaces/ct"]
+	path = app/interfaces/ct
+	url = git@192.168.1.78:model-services/comment_service_interface.git
+[submodule "app/interfaces/bs"]
+	path = app/interfaces/bs
+	url = git@192.168.1.78:searchers/bs-service-interface.git

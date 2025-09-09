@@ -1,0 +1,167 @@
+# 监听端口
+listen_port: {{ listen_port | default(27550) }}
+# 线程数
+thread_num: {{ thread_num | default(1) }}
+
+docs_url: {{ docs_url | default('~') }}
+openapi_url: {{ openapi_url | default('~') }}
+redoc_url: {{ redoc_url | default('~') }}
+
+# 调度器
+schedulers:
+  # urs 集群
+  urs:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.UrsService
+      servers:
+{% for one in urs_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          timeout: {{ one.timeout | default(1) }}
+{% endfor %}
+
+  # 评论模型集群
+  ct:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.CtService
+      servers:
+{% for one in ct_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          timeout: {{ one.timeout | default(1) }}
+{% endfor %}
+
+ # 线上评论，相似query检索
+  lca:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.LcaService
+      servers:
+{% for one in lca_service %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          timeout: {{ one.timeout | default(1) }}
+{% endfor %}
+
+  # redis集群
+  redis:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.RedisService
+      servers:
+{% for one in redis_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          auth: {{ one.auth }}
+          db: {{ one.db | default(1) }}
+          env: {{ one.env | default('local') }}
+{% endfor %}
+
+  # mongo集群
+  mongo:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.MongoService
+      servers:
+{% for one in mongo_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          user: {{ one.user }}
+          pwd: {{ one.pwd }}
+{% endfor %}
+
+  # mysql集群
+  mysql:
+    impl: app.scheduler.RandomScheduler
+    args:
+      impl: app.services.MysqlService
+      servers:
+{% for one in mysql_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          user: {{ one.user }}
+          pwd: {{ one.pwd }}
+{% endfor %}
+
+  # bs集群
+  bs:
+    impl: app.scheduler.RandomScheduler2D
+    args:
+      impl: app.services.BsService
+      servers:
+{% for one in bs_services %}
+        - ip: {{ one.ip }}
+          port: {{ one.port }}
+          layer: {{ one.layer }}
+          timeout: {{ one.timeout | default(30) }}
+{% endfor %}
+
+
+# 动态配置
+dynamics:
+  # urs接口
+  urs:
+    # ocr接口
+    ocr:
+      # 请求超时
+      timeout: {{ urs.ocr.timeout }}
+    # mit接口
+    mit:
+      # 请求超时
+      timeout: {{ urs.mit.timeout }}
+    # distiller接口
+    distiller:
+      # 请求超时
+      timeout: {{ urs.distiller.timeout }}
+
+  # 评论模型接口
+  ct:
+    # predict接口
+    predict:
+      # 请求超时
+      timeout: {{ ct.predict.timeout }}
+
+  # 文本聚类接口
+  lca:
+    # lcasearch接口
+    lcasearch:
+      # 请求超时
+      timeout: {{ lca.lcasearch.timeout }}
+    # cluster接口
+    cluster:
+      # 请求超时
+      timeout: {{ lca.cluster.timeout }}
+    # cluster_queries接口
+    cluster_queries:
+      # 请求超时
+      timeout: {{ lca.cluster_queries.timeout }}
+
+  # build服务
+  build:
+    # buildone接口
+    buildone:
+      # 请求超时，单位：秒
+      timeout: {{ build.buildone.timeout }}
+    # clean
+    clean:
+      # 请求超时，单位：秒
+      timeout: {{ build.clean.timeout }}
+    # notify接口
+    notify:
+      # 请求超时，单位：秒
+      timeout: {{ build.notify.timeout }}
+    # playback接口
+    playback:
+      # 请求超时，单位：秒
+      timeout: {{ build.playback.timeout }}
+    # reset接口
+    reset:
+      # 请求超时，单位：秒
+      timeout: {{ build.reset.timeout }}
+
+  # 阿里云oss服务
+  oss: {{ oss | default('~') }}
+
+  env: {{ env | default('local') }}

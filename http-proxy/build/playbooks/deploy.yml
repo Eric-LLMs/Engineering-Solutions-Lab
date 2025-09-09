@@ -1,0 +1,56 @@
+# 部署服务
+---
+
+- name: deploy service
+  gather_facts: false
+  hosts: http_proxy_2_{{ cluster }}
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # 载入服务动态配置
+    - name: load template config
+      include_vars:
+        file: "{{ pwd }}/conf/templates/{{ cluster_name }}.yml"
+
+    # 部署容器
+    - name: deploy docker container
+      include_role:
+        name: "{{ pwd }}/build/roles/deploy-container"
+      when: mode == "full"
+
+    # 部署supervisor
+    - name: deploy supervisord
+      include_role:
+        name: common-service/config-supervisor
+      vars:
+        ansible_port: "{{ ssh_port }}"
+      when: mode == "full"
+
+    # 部署服务
+    - name: deploy service
+      include_role:
+        name: "{{ pwd }}/build/roles/deploy-service"
+      vars:
+        bin_path: "{{ pwd }}"
+
+    # 部署exporter
+    - name: deploy exporter
+      include_role:
+        name: "{{ pwd }}/build/roles/deploy-exporter"
+      vars:
+        ansible_port: "{{ ssh_port }}"
+      when: mode == "full"
+
+    # 注册到prometheus
+    - name: register to prometheus
+      include_role:
+        name: common-service/register-to-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-tcp
+        - service-node
+        - service-grok
+        - service-process
+      loop_control:
+        loop_var: sd_prefix
+      when: mode == "full"

@@ -1,0 +1,48 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+    simple:
+        format: "%(levelname)s: %(asctime)s: [%(filename)s:%(lineno)d] %(message)s"
+        datefmt: '%Y-%m-%d %H:%M:%S'
+    full:
+        format: "%(levelname)s: %(asctime)s: [%(name)s:%(filename)s:%(lineno)d] %(message)s"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: full
+
+    grok_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: full
+        filename: log/grok.log
+        maxBytes: 104857600
+        encoding: utf8
+
+    file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: full
+        filename: log/server.log
+        maxBytes: 104857600
+        encoding: utf8
+
+loggers:
+    urllib3:
+        level: INFO
+    werkzeug:
+        level: WARN
+    multipart:
+        level: INFO
+    oss2:
+        level: INFO
+
+root:
+    level: DEBUG
+    handlers:
+        - console
+        - grok_handler
+        - file_handler

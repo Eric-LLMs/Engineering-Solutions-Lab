@@ -1,0 +1,50 @@
+# 部署exporter
+---
+
+# 部署grok_exporter
+- name: config grok_exporter
+  copy:
+    src: grok_exporter-supervisord.conf
+    dest: /root/supervisor/daemon/
+
+- name: config grok config
+  template:
+    src: grok/service.yml
+    dest: /root/exporter/grok_service.yml
+
+- name: touch grok.log
+  file:
+    dest: "{{ path }}/log/grok.log"
+    state: touch
+
+# 部署process_exporter
+- name: config process_exporter
+  copy:
+    src: process_exporter-supervisord.conf
+    dest: /root/supervisor/daemon/
+
+- name: config process config
+  template:
+    src: process/process.yml
+    dest: /root/exporter/process.yml
+
+# 部署filebeat
+- name: config filebeat
+  copy:
+    src: filebeat-supervisord.conf
+    dest: /root/supervisor/daemon/
+
+- name: config filebeat config
+  template:
+    src: filebeat.yml
+    dest: /root/filebeat/filebeat.yml
+
+# 重启exporter
+- name: update supervisor and restart exporter
+  shell: supervisorctl -u {{ supervisor.username }} -p {{ supervisor.passwd }} -c /root/supervisor/supervisord.conf {{ item }}
+  loop:
+  - reread
+  - update
+  - restart grok_exporter
+  - restart filebeat
+  - restart process_exporter

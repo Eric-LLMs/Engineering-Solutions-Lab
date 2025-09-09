@@ -1,0 +1,97 @@
+// urs 服务接口定义
+
+syntax = "proto3";
+
+package acme.algorithm.urs;
+
+// 返回码
+enum RtnCode {
+    OK = 0;         /* ok is good */
+    FAIL = 1;       /* fail is not good */
+
+    //reserved 2 to 99;
+
+    AUTHENTICATION_FAILED = 100;  // 认证失败
+    INVALID_ACCESS_KEY = 101; // 无效 access key
+    INCORRECT_SIGNATURE = 102;    // 签名错误
+}
+
+// 标准请求信息
+message RequestInfo {
+    string logid = 1;   // logid，用于服务日志输出和debug
+    string source = 2;  // 请求来源，一般为上游服务/模块名
+    repeated uint32 sampleids = 3;  // 抽样id
+    string uip = 4; // 用户ip
+    string peerip = 5;  // 请求端ip
+
+    string access_key = 6;  // 认证使用的访问key
+    string signature = 7;   // 请求包数据签名
+
+    uint32 appid = 8;   // 应用id，用于策略分层
+
+    reserved 9 to 99;
+
+    bool debug = 100; // 调试模式
+}
+
+// 标准响应信息
+message ResponseInfo {
+    RtnCode code = 1;
+
+    reserved 2 to 99;
+
+    string debug = 100; // debug信息
+}
+
+// 单文件（二进制流）请求包
+message CommonRequest {
+    RequestInfo info = 1;
+    bytes data = 2;
+    string params = 3;
+}
+
+message CommonResponse {
+    ResponseInfo rtn = 1;
+    string extracts = 2;
+    string text = 3;
+    string meta = 4;
+}
+
+// 多文件（二进制流）请求包
+message CommonMultiRequest {
+    RequestInfo info = 1;
+    repeated bytes data = 2;
+    string params = 3;
+}
+
+// 字符串请求包
+message StringRequest {
+    RequestInfo info = 1;
+    string data = 2;
+    string params = 3;
+}
+
+// urs服务
+service UrsService {
+    // 关闭服务器
+    rpc shutdown(RequestInfo) returns (ResponseInfo);
+    // ping服务器
+    rpc ping(RequestInfo) returns (ResponseInfo);
+
+    // 识别图像中的文字，并进行信息提取
+    rpc ocr(CommonRequest) returns (CommonResponse);
+    // 识别图片中的文字（支持多张子图），并进行信息提取
+    rpc ocr_multi(CommonMultiRequest) returns (CommonResponse);
+    // 图像标签
+    rpc mit(CommonRequest) returns (CommonResponse);
+    // 视频标签，通过视频存储url来传递视频
+    rpc mit_video(StringRequest) returns (CommonResponse);
+    // string
+    rpc distiller(StringRequest) returns (CommonResponse);
+    // word文件
+    rpc distiller_doc(CommonRequest) returns (CommonResponse);
+    // txt文件
+    rpc distiller_txt(CommonRequest) returns (CommonResponse);
+    // 语音接口
+    // rpc asr(CommonRequest) returns (CommonResponse);
+}

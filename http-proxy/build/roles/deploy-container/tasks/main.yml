@@ -1,0 +1,72 @@
+# 部署 runtime 容器
+---
+
+# 创建相关路径
+- name: create service directory
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+    # 存储可执行文件
+    - "{{ deploy_path }}/bin"
+    # 配置文件
+    - "{{ deploy_path }}/conf"
+    # 存储数据
+    - "{{ deploy_path }}/data"
+    # 存储日志
+    - "{{ deploy_path }}/log"
+
+# 启动镜像
+- name: start container
+  docker_container:
+    name: "{{ service_name }}-{{ ssh_port }}"
+    image: "{{ docker.register.ip }}/{{ docker.image }}:{{ docker.tag }}"
+    state: started
+    volumes:
+      - "{{ deploy_path }}/bin/app:{{ path }}/app"
+      - "{{ deploy_path }}/bin/bin:{{ path }}/bin"
+      - "{{ deploy_path }}/bin/conf:{{ path }}/conf"
+      - "{{ deploy_path }}/bin/etcd-proxy:{{ path }}/etcd-proxy"
+      - "{{ deploy_path }}/bin/test:{{ path }}/test"
+      - "{{ deploy_path }}/log:{{ path }}/log"
+    ports:
+      - '{{ ssh_port }}:22'
+      - '{{ service_port }}:{{ listen_port }}'
+      - '{{ supervisor_port }}:{{ supervisor.listen_port }}'
+      - "{{ node_exporter_port }}:39100"
+      - "{{ grok_exporter_port }}:39101"
+      - "{{ blackbox_exporter_port }}:39102"
+      - "{{ process_exporter_port }}:39103"
+    ulimits:
+      - "core:-1"
+    recreate: yes
+    restart_policy: always
+
+# 等待 3s，以便容器完全启动
+- name: wait for 3 seconds
+  wait_for:
+    timeout: 3
+
+# 删除本地过时的容器主机信息
+- name: remove obsolete known_hosts on local server
+  connection: local
+  known_hosts:
+    name: "[{{ ansible_host }}]:{{ ssh_port }}"
+    state: absent
+
+# 设置与容器 root 账号的信任关系
+- name: set ssh-copyid to root
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    state: present
+  vars:
+    ansible_ssh_pass: "{{ docker_image_root_passwd }}"
+    ansible_port: "{{ ssh_port }}"
+
+# 修改容器密码
+- name: change root password
+  shell: echo "root:{{ docker_root_passwd }}" | chpasswd
+  when: docker_root_passwd is defined and docker_root_passwd != docker_image_root_passwd
+  vars:
+    ansible_port: "{{ ssh_port }}"

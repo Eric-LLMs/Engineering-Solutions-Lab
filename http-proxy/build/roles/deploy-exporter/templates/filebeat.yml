@@ -1,0 +1,29 @@
+# 日志监控
+---
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - {{ path }}/log/grok.log
+  # 日志多行配置
+  multiline:
+    pattern: "^([Aa]lert|ALERT|[Tt]race|TRACE|[Dd]ebug|DEBUG|[Nn]otice|NOTICE|[Ii]nfo|INFO|[Ww]arn?(?:ing)?|WARN?(?:ING)?|[Ee]rr?(?:or)?|ERR?(?:OR)?|[Cc]rit?(?:ical)?|CRIT?(?:ICAL)?|[Ff]atal|FATAL|[Ss]evere|SEVERE|EMERG(?:ENCY)?|[Ee]merg(?:ency)?)"
+    negate: true
+    match: after
+    timeout: 2
+  fields:
+    logtype: service-log
+    service: {{ service_name }}
+    cluster: {{ group_names[-1] }}
+    hostname: {{ ansible_host }}:{{ service_port }}
+  tail_files: true
+
+output.logstash:
+  # The Logstash hosts
+  hosts:
+{% for one in groups[logstash_name] %}
+{% set var = hostvars[one] %}
+    - {{ var.ansible_host }}:{{ var.listen_port }}
+{% endfor %}
+  loadbalance: true

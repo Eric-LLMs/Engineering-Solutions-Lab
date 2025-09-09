@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package acme.algorithm.bs;
+
+// 返回码
+enum RtnCode {
+    OK = 0;         /* ok is good */
+    FAIL = 1;       /* fail is not good */
+
+    //reserved 2 to 99;
+
+    AUTHENTICATION_FAILED = 100;  // 认证失败
+    INVALID_ACCESS_KEY = 101; // 无效 access key
+    INCORRECT_SIGNATURE = 102;    // 签名错误
+}
+
+// 标准请求信息
+message RequestInfo {
+    string logid = 1;   // logid，用于服务日志输出和debug
+    string source = 2;  // 请求来源，一般为上游服务/模块名
+    repeated uint32 sampleids = 3;  // 抽样id
+    string uip = 4; // 用户ip
+    string peerip = 5;  // 请求端ip
+
+    string access_key = 6;  // 认证使用的访问key
+    string signature = 7;   // 请求包数据签名
+
+    uint32 appid = 8;   // 应用id，用于策略分层
+
+    reserved 9 to 99;
+
+    bool debug = 100; // 调试模式
+}
+
+// 标准响应信息
+message ResponseInfo {
+    RtnCode code = 1;
+
+    reserved 2 to 99;
+
+    string debug = 100; // debug信息
+}

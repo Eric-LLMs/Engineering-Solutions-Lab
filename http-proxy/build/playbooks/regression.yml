@@ -1,0 +1,13 @@
+# 功能回归
+---
+
+- name: regression
+  gather_facts: false
+  hosts: "{{ (groups[ 'http_proxy_2_' + cluster ] | shuffle)[0] }}"
+  tasks:
+    # 回归
+    - name: regression
+      include_role:
+        name: common-service/regression
+      vars:
+        ansible_port: "{{ ssh_port }}"

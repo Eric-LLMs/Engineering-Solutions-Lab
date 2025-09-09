@@ -1,0 +1,127 @@
+# 开发环境静态配置
+---
+
+# 线程数
+thread_num: 4
+
+docs_url: /docs
+openapi_url: /openapi.json
+redoc_url: /redoc
+
+# urs 服务集群
+urs_services:
+  - ip:
+    port:
+
+# 评论模型服务集群
+ct_services:
+  - ip:
+    port:
+
+# redis 服务器
+redis_services:
+  - ip:
+    port:
+    auth:
+    db: 1
+    env: dev
+
+# mongo-proxy 服务器
+mongo_services:
+  - ip:
+    port:
+    user:
+    pwd:
+
+# MySql数据库
+mysql_services:
+  - ip:
+    port:
+    user:
+    pwd:
+
+# bs建库服务
+bs_services:
+{% for each in groups['bs_service_qa'] %}
+{% set var = hostvars[each] %}
+  - ip: {{ var.ansible_host }}
+    port: {{ var.service_port | int - 1 }}
+    layer: {{ var.layer }}
+{% endfor %}
+
+# 在线评论分析
+lca_service:
+  - ip:
+    port:
+
+# urs接口
+urs:
+  # ocr接口
+  ocr:
+    # 请求超时，单位：秒
+    timeout: 120
+  # mit接口
+  mit:
+    # 请求超时，单位：秒
+    timeout: 30
+  # distiller接口
+  distiller:
+    # 请求超时，单位：秒
+    timeout: 2
+
+# 评论模型服务
+ct:
+  # predict接口
+  predict:
+    # 请求超时，单位：秒
+    timeout: 2
+
+# 在线评论分析
+lca:
+  # lcasearch接口
+  lcasearch:
+    # 请求超时
+    timeout: 60
+
+  # cluster接口
+  cluster:
+    # 请求超时
+    timeout: 600
+
+  cluster_queries:
+    # 请求超时
+    timeout: 600
+
+# build服务
+build:
+  # buildone接口
+  buildone:
+    # 请求超时，单位：秒
+    timeout: 300
+  # clean
+  clean:
+    # 请求超时，单位：秒
+    timeout: 300
+  # notify接口
+  notify:
+    # 请求超时，单位：秒
+    timeout: 1800 # 半小时
+  # playback接口
+  playback:
+    # 请求超时，单位：秒
+    timeout: 1800 # 半小时
+  # reset接口
+  reset:
+    # 请求超时，单位：秒
+    timeout: 1800 # 半小时
+
+
+# 线上oss服务
+oss:
+  url:
+  bucket:
+  fake_ak:
+  fake_sk:
+  prefix: "{{ service_name }}/{{ cluster_name }}"
+
+env: qa

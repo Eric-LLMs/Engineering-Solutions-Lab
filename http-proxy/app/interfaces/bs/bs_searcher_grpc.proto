@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package acme.algorithm.bs;
+
+import "bs_interface_common.proto";
+
+// term 信息
+message RequestTerm {
+	string text = 1;	// token 文本
+
+	double weight = 2;	// 重要性，0~1
+
+	uint32 offset = 3;	// 切词偏移
+	uint32 length = 4;	// 字长度
+
+	uint32 byte_offset = 5;	// 字节偏移
+	uint32 byte_length = 6;	// 字节长度
+
+	uint32 sign1 = 7;	// 签名1
+	uint32 sign2 = 8;	// 签名2
+
+	uint32 attr = 9;	// 属性，0x1: 符号
+	uint32 rank = 10;	// 分层，0x1: 停用词，0x2: 普通词，0x3: 专名
+
+	uint32 granularity = 11; // 切词粒度, 0x1:单字  0x2:基本词  0x4:混排
+};
+
+// search 请求包
+message SearchRequest {
+	RequestInfo info = 1;	// 标准请求信息
+
+    int32 demand_type = 2;	// demand type
+    string query = 3;	// 搜索 query
+	repeated RequestTerm terms = 4;	// term 列表
+	string conditions = 5; // 搜索筛选条件
+};
+
+// 结果元素
+message ResponseElement {
+	string id = 1;	// 元素 id
+	uint32 type = 2;	// 元素 type
+	uint32 is_show = 3;	// 是否展现
+	uint32 weight = 4;	// 权重
+	string content = 5;	// 内容
+	map<string, string> props = 6;	// 属性
+};
+
+// 单个结果
+message ResponseItem {
+	uint32 doctype = 1;	// 结果 type
+	uint32 docid = 2;	// 结果 id
+	uint32 score = 3;	// 相关性分数
+
+	repeated ResponseElement elements = 4;	// 元素lli二标
+	map<string, string> props = 5;	// 属性
+};
+
+// search 响应包
+message SearchResponse {
+	ResponseInfo rtn = 1;	// 标准响应信息
+
+	repeated ResponseItem results = 2;	// 结果信息
+	uint32 related_num = 3; // 所有相关结果数量
+ };
+
+service SearcherGrpc {
+	// ping
+	rpc ping(RequestInfo) returns (ResponseInfo);
+
+	// 倒排搜索
+	rpc search(SearchRequest) returns (SearchResponse);
+	// reload 配置
+	rpc reload_conf(RequestInfo) returns (ResponseInfo);
+};

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package acme.algorithm.bs;
+
+import "bs_interface_common.proto";
+
+// build 请求包
+message BuildRequest {
+      RequestInfo info = 1;   // 标准请求信息
+
+      uint32 type = 2;  // 文档类型
+      uint32 id = 3;    // 文档id
+      bytes data = 4;   // 文档数据
+      uint32 layer = 5; // layer [parser专用]
+      uint32 commands = 6; // 下游服务控制命令 [parser专用] [用以控制数据流向] [按bit区分] [1表示流入, 0表示不流入] ['b'01:invertor  'b'10:ae]
+};
+
+// reload 请求包
+message ReloadRequest {
+      RequestInfo info = 1;   // 标准请求信息
+
+      uint32 type = 2;  // 文档类型
+      uint32 layer = 3;   // layer [parser专用]
+      uint32 commands = 4; // 下游服务控制命令 [parser专用] [用以控制数据流向] [按bit区分] [1表示流入, 0表示不流入] ['b'01:invertor  'b'10:ae]
+};
+
+// delete 清索引请求包
+message RemoveRequest {
+      RequestInfo info = 1;   // 标准请求信息
+
+      uint32 type = 2;  // 文档类型
+      uint32 docid = 3; // 文档id
+      uint32 layer = 4; // layer [parser专用]
+      uint32 commands = 5; // 下游服务控制命令 [parser专用] [用以控制数据流向] [按bit区分] [1表示流入, 0表示不流入] ['b'01:invertor  'b'10:ae]
+};
+
+service BuildGrpc {
+      // ping
+      rpc ping(RequestInfo) returns (ResponseInfo);
+
+      rpc build(BuildRequest) returns (ResponseInfo);
+      rpc remove(RemoveRequest) returns (ResponseInfo);
+      rpc clean(ReloadRequest) returns (ResponseInfo);
+      rpc reload(ReloadRequest) returns (ResponseInfo);
+      rpc reload_conf(ReloadRequest) returns (ResponseInfo);
+};

@@ -1,0 +1,89 @@
+// 直播评论分析GRPC接口定义
+
+syntax = "proto3";
+
+package acme.algorithm.live_comment;
+
+// 返回码枚举
+enum RtnCode {
+    OK = 0;
+    FAIL = 1;
+
+    AUTHENTICATION_FAILED = 2;  // 认证失败
+    ACCESS_DENIED = 3;  // 访问被拒绝，access key失效
+}
+
+// 标准请求信息
+message RequestInfo {
+    string logid = 1;   // logid，用于服务日志输出和debug
+    string source = 2;  // 请求来源，一般为上游服务/模块名
+    repeated uint32 sampleids = 3;  // 抽样id
+    string uip = 4; // 用户ip
+    string peerip = 5;  // 请求端ip
+
+    string access_key = 6;  // 认证使用的访问key
+    string signature = 7;   // 请求包数据签名
+
+    uint32 appid = 8;   // 应用id，用于策略分层
+
+    reserved 9 to 99;
+
+    bool debug = 100; // 调试模式
+}
+
+// 标准响应信息
+message ResponseInfo {
+    RtnCode code = 1;    // 返回码
+
+    reserved 2 to 99;
+
+    string debug = 100;   // debug信息
+}
+
+// 对话请求包
+message CommentAnalyzerRequest {
+    RequestInfo info = 1;   // 标准请求信息
+
+    string knowledge_base = 2;   // 要查询的知识库
+
+    string query = 3;   // 要查询的query
+
+    float threshold = 4;
+}
+
+// 对话响应包
+message CommentAnalyzerResponse {
+    ResponseInfo rtn = 1;   // 标准响应信息
+
+    repeated string comment_analyzer_response_content = 2;  // 聚类结果
+}
+
+// query聚类对话请求包
+message CommentClusteringRequest {
+    RequestInfo info = 1;   // 标准请求信息
+
+    string filename = 2;   // 要查询的query
+
+    repeated string  queries = 3;
+}
+
+// query聚类对话响应包
+message CommentClusteringResponse {
+    ResponseInfo rtn = 1;   // 标准响应信息
+
+    repeated string comment_clustering_response_content = 2;  // 聚类结果
+}
+
+
+// 评论分析服务
+service CommentAnalyzerService {
+    // ping
+    rpc ping(RequestInfo) returns (ResponseInfo);
+    // shutdown
+    rpc shutdown(RequestInfo) returns (ResponseInfo);
+
+    // 相似query请求
+    rpc get_top_similar_queries(CommentAnalyzerRequest) returns (CommentAnalyzerResponse);
+    // query聚类请求
+    rpc query_clustering(CommentClusteringRequest) returns (CommentClusteringResponse);
+}
