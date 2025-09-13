@@ -1,0 +1,75 @@
+# 部署服务
+---
+
+# 同步服务文件
+- name: rsync service files to remote server
+  synchronize:
+    src: "{{ bin_path }}/"
+    dest: "{{ deploy_path }}"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+    - "--ignore-errors"
+    - "--exclude=.*"
+
+# 生成动态配置
+- name: generate conf/etcd.yml
+  template:
+    src: "{{ bin_path }}/{{ item }}.j2"
+    dest: "{{ deploy_path }}/{{ item }}"
+  loop:
+  - conf/etcd.yml
+# 利用etcd生成服务配置
+- name: generate dynamic config files by etcd-proxy
+  shell: python3 etcd-proxy/etcd-proxy.py -c conf/etcd.yml
+  args:
+    chdir: "{{ path }}"
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_root_passwd }}"
+
+# 安装 python 依赖
+- name: install python requirements
+  shell: pip3 install -r {{ path }}/bin/requirements.txt -i {{ pip_source.acme }}
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_root_passwd }}"
+
+# 配置supervisord
+- name: set supervisord daemon config files
+  template:
+    src: "{{ item }}"
+    dest: "{{ supervisor.install_path }}/daemon/"
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_root_passwd }}"
+  loop:
+  - etcd-supervisord.conf
+  - service-supervisord.conf
+
+# 更新jieba词典
+- name: update jieba dict
+  shell: cp -rf {{ path }}/data/jieba/dict.txt /usr/local/lib/python3.6/site-packages/jieba/dict.txt
+  vars:
+    ansible_port: "{{ ssh_port }}"
+
+# 重启service
+- name: restart service by supervisord
+  shell: supervisorctl -u {{ supervisor.username }} -p {{ supervisor.passwd }} -c {{ supervisor.install_path }}/supervisord.conf {{ item }}
+  loop:
+  - reread
+  - update
+  - restart etcd-proxy
+  - restart {{ service_name }}
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_root_passwd }}"
+
+# 部署 docker-entrypoint.sh 用于容器重启恢复服务
+- name: deploy docker-entrypoint.sh
+  copy:
+    src: docker-entrypoint.sh
+    dest: /root
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_root_passwd }}"

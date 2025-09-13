@@ -1,0 +1,38 @@
+# 部署词典
+---
+
+# 创建本地词典路径
+- name: create local dict directory
+  connection: local
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+  - "{{ dict_path }}"
+
+# 从数据中心同步数据
+- name: pull data from data-center
+  connection: local
+  shell: rsync -avP --ignore-errors --exclude=".*" --delete-excluded {{ datacenter.ansible_user }}@{{ datacenter.ansible_host }}:{{ datacenter.data_path }}/{{ item.name }}/{{ item.version }}/ {{ item.dest }}
+  loop:
+    - name: "{{ cluster_name }}/live-comments-analysis/albert"
+      version: "{{ albert_version | default('latest') }}"
+      dest: "{{ dict_path }}/albert"
+    - name: "{{ cluster_name }}/live-comments-analysis/lightGBM"
+      version: "{{ lgb_version | default('latest') }}"
+      dest: "{{ dict_path }}/lightGBM"
+    - name: "{{ cluster_name }}/live-comments-analysis/jieba"
+      version: "{{ jieba_version | default('latest') }}"
+      dest: "{{ dict_path }}/jieba"
+
+# 同步词典
+- name: send dict to server
+  synchronize:
+    src: "{{ dict_path }}/"
+    dest: "{{ deploy_path }}/data"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+      - "--ignore-errors"
+      - '--exclude=.*'
+      - "--delete-excluded"

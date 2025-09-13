@@ -1,0 +1,13 @@
+# 重载用户画像数据
+---
+
+- name: restart service
+  hosts: live_comments_analysis_{{ cluster }}
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # reload
+    - name: restart service
+      shell: supervisorctl -u {{ supervisor.username }} -p {{ supervisor.passwd }} -c {{ supervisor.install_path }}/supervisord.conf restart {{ service_name }}
+      vars:
+        ansible_port: "{{ ssh_port }}"
+        ansible_ssh_pass: "{{ docker_root_passwd }}"

@@ -1,0 +1,50 @@
+# 部署 runtime 容器
+---
+
+# 创建相关路径
+- name: create service directory
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ deploy_path }}"
+
+# 启动镜像
+- name: start container
+  docker_container:
+    name: "{{ service_name }}-{{ ssh_port }}"
+    image: "{{ docker.register.ip }}/{{ docker.image }}:{{ docker.tag }}"
+    state: started
+    volumes:
+      - "{{ deploy_path }}:{{ path }}"
+    ports:
+      - '{{ ssh_port }}:22'
+      - '{{ service_port }}:{{ listen_port }}'
+      - '{{ supervisor_port }}:{{ supervisor.listen_port }}'
+      - "{{ grok_exporter_port }}:39101"
+      - "{{ blackbox_exporter_port }}:39102"
+      - "{{ process_exporter_port }}:39103"
+    ulimits:
+      - "core:-1"
+    recreate: yes
+    restart_policy: always
+
+# 等待 3s，以便容器完全启动
+- name: wait for 3 seconds
+  wait_for:
+    timeout: 3
+
+# 删除本地过时的容器主机信息
+- name: remove obsolete known_hosts on local server
+  connection: local
+  known_hosts:
+    name: "[{{ ansible_host }}]:{{ ssh_port }}"
+    state: absent
+
+# 修改容器密码
+- name: change root password
+  shell: echo "root:{{ docker_root_passwd }}" | chpasswd
+  when: docker_root_passwd is defined and docker_root_passwd != docker_image_root_passwd
+  vars:
+    ansible_port: "{{ ssh_port }}"
+    ansible_ssh_pass: "{{ docker_image_root_passwd }}"

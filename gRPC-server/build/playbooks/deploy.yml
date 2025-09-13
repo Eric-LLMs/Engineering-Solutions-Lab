@@ -1,0 +1,72 @@
+# 部署服务
+---
+
+- name: deploy service
+  hosts: live_comments_analysis_{{ cluster }}
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # 生成动态配置
+    - name: generate conf/templates/{{ cluster_name }}.yml
+      connection: local
+      template:
+        src: "{{ pwd }}/{{ item }}"
+        dest: "{{ pwd }}/{{ item }}"
+      loop:
+      - conf/templates/{{ cluster_name }}.yml
+    # 载入服务动态配置
+    - name: load template config
+      include_vars:
+        file: "{{ pwd }}/conf/templates/{{ cluster_name }}.yml"
+
+    # 部署容器
+    - name: deploy docker container
+      include_role:
+        name: "{{ pwd }}/../build/roles/deploy-container"
+      when: mode == "full"
+
+    # 部署supervisord
+    - name: deploy supervisord
+      include_role:
+        name: common-server/install-supervisord
+      vars:
+        ansible_port: "{{ ssh_port }}"
+        ansible_ssh_pass: "{{ docker_root_passwd }}"
+      when: mode == "full"
+
+    # 部署词典
+    - name: deploy dict
+      include_role:
+        name: "{{ pwd }}/../build/roles/deploy-dict"
+      vars:
+        dict_path: "{{ datapath }}/{{ inventory_hostname }}"
+        datacenter: "{{ hostvars[(groups[datacenter_name] | shuffle)[0]] }}"
+      when: update_dicts | bool
+
+    # 部署服务
+    - name: deploy service
+      include_role:
+        name: "{{ pwd }}/../build/roles/deploy-service"
+      vars:
+        bin_path: "{{ pwd }}"
+
+    # 部署exporter
+    - name: deploy exporter
+      include_role:
+        name: "{{ pwd }}/../build/roles/deploy-exporter"
+      vars:
+        ansible_port: "{{ ssh_port }}"
+        ansible_ssh_pass: "{{ docker_root_passwd }}"
+
+    # 注册服务到prometheus
+    - name: register to prometheus
+      include_role:
+        name: common-service/register-to-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-tcp
+        - service-grok
+        - service-process
+      loop_control:
+        loop_var: sd_prefix
+      when: mode == "full"

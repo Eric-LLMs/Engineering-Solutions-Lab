@@ -1,0 +1,4 @@
+process_names:
+  - name: {{ service_name }}
+    cmdline:
+      - {{ path }}/bin/app.py

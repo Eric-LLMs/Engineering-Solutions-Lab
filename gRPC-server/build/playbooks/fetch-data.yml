@@ -1,0 +1,29 @@
+# 从数据中心获取服务数据
+---
+
+- name: pull data to local
+  gather_facts: false
+  hosts: localhost
+  tasks:
+    # 创建本地数据路径，用于后面同步数据
+    - name: create {{ dict_destination }} directory
+      connection: local
+      file:
+        dest: "{{ dict_destination }}"
+        state: directory
+    # 从数据中心拉取数据
+    - name: pull data from data-center
+      include_role:
+        name: datacenter/pull
+      vars:
+        targets:
+          - name: "{{ cluster_name }}/live-comments-analysis/albert"
+            version: "{{ albert_version | default('latest') }}"
+            dest: "{{ dict_destination }}/albert"
+          - name: "{{ cluster_name }}/live-comments-analysis/lightGBM"
+            version: "{{ lgb_version | default('latest') }}"
+            dest: "{{ dict_destination }}/lightGBM"
+          - name: "{{ cluster_name }}/live-comments-analysis/jieba"
+            version: "{{ jieba_version | default('latest') }}"
+            dest: "{{ dict_destination }}/jieba"
+        datacenter: "{{ hostvars[(groups[datacenter_name] | shuffle)[0]] }}"

@@ -1,0 +1,7 @@
+dependencies:
+  - role: common-server/pull-docker-image
+    vars:
+      docker_register: "{{ docker.register }}"
+      docker_image:
+        name: "{{ docker.register.ip }}/{{ docker.image }}"
+        tag: "{{ docker.tag }}"
