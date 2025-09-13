@@ -1,0 +1,26 @@
+INFO: 2020-12-15 14:35:40,293: [App:__init__.py:113] logging initialized
+INFO: 2020-12-15 14:35:40,296: [App:__init__.py:121] conf/service.yml loaded
+INFO: 2020-12-15 14:35:43,154: [DictReloadThread:dictmanager.py:23] dict reload thread started
+INFO: 2020-12-15 14:35:43,154: [root:__init__.py:16] loaded parallel layer AnalyzerLayer
+INFO: 2020-12-15 14:35:43,162: [ParallelLayer:base_layer.py:52] ParallelLayer:analyzer create process pool * 1
+INFO: 2020-12-15 14:35:45,749: [DictReloadThread:dictmanager.py:23] dict reload thread started
+INFO: 2020-12-15 14:35:45,750: [ParallelLayer:base_layer.py:149] AnalyzerLayer instance no.0 initialized
+INFO: 2020-12-15 14:35:45,750: [ParallelLayer:base_layer.py:62] ParallelLayer:analyzer start running, LayerMode.MULTI_PROCESS mode, 1 workers
+INFO: 2020-12-15 14:35:45,795: [root:__init__.py:18] loaded interface GrpcInterface:grpc
+INFO: 2020-12-15 14:35:45,805: [DictReloadThread:dictmanager.py:23] dict reload thread started
+INFO: 2020-12-15 14:35:45,805: [CommentAnalyzerService:comment_analyzer_service.py:38] CommentAnalyzerService initialized
+INFO: 2020-12-15 14:35:45,807: [CommentAnalyzerService:comment_analyzer_service.py:46] added grpc service CommentAnalyzerService to GrpcInterface:grpc
+INFO: 2020-12-15 14:35:45,810: [GrpcInterface:grpc_interface.py:73] GrpcInterface:grpc start running, listen port 30003, 3 workers
+INFO: 2020-12-15 14:35:45,810: [App:__init__.py:180] all interfaces running
+DEBUG: 2020-12-15 14:42:26,549: [CommentAnalyzerService:comment_analyzer_service.py:52] REQUEST_MESSAGE: {"logid": "logid-b1e803d2-3ea0-11eb-8ed1-7b79f6e44414", "source": "test", "sampleids": [], "uip": "", "peerip": "", "access_key": "", "signature": "", "appid": 0, "debug": false}
+DEBUG: 2020-12-15 14:42:26,550: [CommentAnalyzerService:comment_analyzer_service.py:146] pong
+INFO: 2020-12-15 14:42:26,555: [CommentAnalyzerService:grpc_interface.py:162] CommentAnalyzerService * 140646799099648 00000001 api=ping tm=4050 rz=50 sz=0 ip=127.0.0.1 pid=11513 source=test appid=0 logid=logid-b1e803d2-3ea0-11eb-8ed1-7b79f6e44414 rt=0 
+DEBUG: 2020-12-15 14:42:26,560: [CommentAnalyzerService:comment_analyzer_service.py:52] REQUEST_MESSAGE: {"info": {"logid": "logid-b1eabfc8-3ea0-11eb-8ed1-7b79f6e44414", "source": "text", "debug": true, "sampleids": [], "uip": "", "peerip": "", "access_key": "", "signature": "", "appid": 0}, "query": "痔疮需要开刀？", "threshold": 0.32}
+DEBUG: 2020-12-15 14:42:26,603: [jieba:__init__.py:113] Building prefix dict from the default dictionary ...
+DEBUG: 2020-12-15 14:42:26,604: [jieba:__init__.py:133] Loading model from cache /tmp/jieba.cache
+DEBUG: 2020-12-15 14:42:29,369: [jieba:__init__.py:165] Loading model cost 2.765 seconds.
+DEBUG: 2020-12-15 14:42:29,369: [jieba:__init__.py:166] Prefix dict has been built successfully.
+DEBUG: 2020-12-15 14:45:06,284: [CommentAnalyzerService:comment_analyzer_service.py:52] REQUEST_MESSAGE: {"logid": "logid-111e3a06-3ea1-11eb-9c5d-ffaa08007822", "source": "test", "sampleids": [], "uip": "", "peerip": "", "access_key": "", "signature": "", "appid": 0, "debug": false}
+DEBUG: 2020-12-15 14:45:06,285: [CommentAnalyzerService:comment_analyzer_service.py:146] pong
+INFO: 2020-12-15 14:45:06,288: [CommentAnalyzerService:grpc_interface.py:162] CommentAnalyzerService * 140646790706944 00000002 api=ping tm=2286 rz=50 sz=0 ip=127.0.0.1 pid=11513 source=test appid=0 logid=logid-111e3a06-3ea1-11eb-9c5d-ffaa08007822 rt=0 
+DEBUG: 2020-12-15 14:45:06,292: [CommentAnalyzerService:comment_analyzer_service.py:52] REQUEST_MESSAGE: {"info": {"logid": "logid-11200e26-3ea1-11eb-9c5d-ffaa08007822", "source": "text", "debug": true, "sampleids": [], "uip": "", "peerip": "", "access_key": "", "signature": "", "appid": 0}, "query": "痔疮需要开刀？", "threshold": 0.32}
