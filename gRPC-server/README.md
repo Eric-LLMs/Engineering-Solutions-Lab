@@ -1,14 +1,15 @@
 gRPC-server
 
-# 新添加服务配置在目录 gRPC-server/ita/inventory/services 下面
-# 安装虚拟环境
+# 1. Setup & Run
+
+### Create a virtual environment
 ```bash
 # 如果是新安装conda，需要激活。
 conda create -n gRPC_server_py36 python=3.6
 conda activate gRPC_server_py36_py36
 ```
 
-# 下载项目
+### Clone the project 
 ```bash
 git@192.168.1.78:model-services/live-comments-analysis.git
 cd live-comments-analysis
@@ -21,7 +22,7 @@ cd bin
 sh fetch-data.sh
 ```
 
-# 安装依赖
+### Install dependencies 
 ```bash
 # 设置清华源
 pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U
@@ -34,10 +35,19 @@ pip3 install grpcio-tools
 pip install -r bin/requirements.txt
 ```
 
-# 启动服务
+### Start the server
 ```bash
 sh bin/startup.sh
 # 客户端测试
 cd test
 python client.py
 ```
+
+# 2. Adding a New Service   
+### To add a new gRPC service implementation, follow these steps:
+- Create a new service implementation under the directory:
+``` 
+  gRPC-server/ita/inventory/services/  
+```
+- Add a configuration file for the new service in the same directory. This configuration will define how the service is registered and started within the gRPC server framework.
+- Restart the server to load the newly added service. 
