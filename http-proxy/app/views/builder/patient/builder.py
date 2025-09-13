@@ -1,7 +1,7 @@
 '''
 @brief 构建患者管理建库doc。
-@author lijunyan
-@email lijunyan@acme.cn
+@author  
+@email  @acme.cn
 @date 2020.06.29
 @update 2020.06.29
 '''
