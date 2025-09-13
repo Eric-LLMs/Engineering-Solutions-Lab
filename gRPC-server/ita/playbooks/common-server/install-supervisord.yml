@@ -1,0 +1,11 @@
+# 在服务器上安装 supervisord
+# -e cluster=服务器集群
+---
+
+- name: install supervisord
+  hosts: "{{ servers }}"
+  serial: 4
+  tasks:
+    - name: install supervisord
+      include_role:
+        name: common-server/install-supervisord

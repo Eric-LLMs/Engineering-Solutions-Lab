@@ -1,0 +1,57 @@
+# 构建docker镜像
+# @image_name: 需要构建的镜像名，该名字与files目录下的子目录对应，同时也用于生成的镜像名
+# @image_ver: 构建镜像的版本
+---
+# 从数据中心拉取构建镜像必须的数据
+- name: pull data from data center
+  include_role:
+    name: datacenter/pull
+  vars:
+    targets:
+      - name: "{{ image_name }}"
+        version: "{{ image_ver }}"
+        dest: "{{ docker_build_tmp }}"
+    copy_links: true
+
+# 上传 build 所需要的数据
+- name: upload dockerfile and other files
+  synchronize:
+    src: "{{ item }}"
+    dest: "{{ docker_build_tmp }}"
+    checksum: yes
+    compress: yes
+    copy_links: yes
+    rsync_opts:
+      - "--ignore-errors"
+  loop:
+    - docker-entrypoint.sh
+    - "{{ role_path }}/files/{{ image_name }}/{{ image_ver }}/"
+  ignore_errors: true
+# 上传 dockefile
+- name: upload Dockerfile
+  template:
+    src: "{{ image_name }}/{{ image_ver }}/Dockerfile"
+    dest: "{{ docker_build_tmp }}"
+# docker build
+- name: build docker image - {{ docker_register.ip }}/{{ image_fullname }}
+  shell: docker build -t {{ docker_register.ip }}/{{ image_fullname }} {{ docker_build_tmp }}
+# docker login
+- name: docker login
+  shell: docker login {{ docker_register.ip }} -u {{ docker_register.username }} -p {{ docker_register.passwd }}
+# push docker 镜像到 register
+- name: push docker image to register {{ docker_register.ip }}
+  shell: docker push {{ docker_register.ip }}/{{ image_fullname }}
+# 删除 build 临时目录
+- name: remove {{ docker_build_tmp }} files
+  file:
+    dest: "{{ docker_build_tmp }}"
+    state: absent
+
+# 删除无用docker volume
+- name: remove none images
+  include_role:
+    name: common-server/remove-none-volumes
+# 删除无用docker镜像
+- name: remove none images
+  include_role:
+    name: common-server/remove-none-images

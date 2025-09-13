@@ -1,0 +1,114 @@
+# prometheus 服务集群
+---
+
+prometheus_all:
+  children:
+    # 内网集群
+    prometheus_intranet:
+      hosts:
+        prometheus_intranet-192.168.0.125:
+          ansible_host: 192.168.0.125
+      vars:
+        # alertmanager 集群名
+        alertmanager_name: alertmanager_intranet
+
+    # acme集群
+    prometheus_acme:
+      hosts:
+        prometheus_acme-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        # 部署路径
+        deploy_path: /data/work/{{ service_name }}/{{ inventory_hostname }}
+        # alertmanager 集群名
+        alertmanager_name: alertmanager_acme
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: prometheus
+    # 部署路径
+    deploy_path: /home/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 端口偏移
+    port_delta: 0
+
+    # 监听端口
+    listen_port: "{{ 9090 + port_delta }}"
+    # docker 镜像 tag
+    docker_tag: v2.18.1
+
+# dingtalk，用于发送消息给钉钉
+dingtalk_all:
+  children:
+    # 内网集群
+    dingtalk_intranet:
+      hosts:
+        dingtalk_intranet-192.168.0.125:
+          ansible_host: 192.168.0.125
+
+    # acme集群
+    dingtalk_acme:
+      hosts:
+        dingtalk_acme-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        deploy_path: /data/work/{{ service_name }}/{{ inventory_hostname }}
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: dingtalk
+    # 部署路径
+    deploy_path: /home/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 端口偏移
+    port_delta: 0
+
+    # 监听端口
+    listen_port: "{{ 8060 + port_delta }}"
+    # docker 镜像 tag
+    docker_tag: latest
+
+# alertmanager，用于报警
+alertmanager_all:
+  children:
+    # 内网集群
+    alertmanager_intranet:
+      hosts:
+        alertmanager_intranet-192.168.0.125:
+          ansible_host: 192.168.0.125
+      vars:
+        # dingtalk 集群名
+        dingtalk_name: dingtalk_intranet
+
+    # acme集群
+    alertmanager_acme:
+      hosts:
+        alertmanager_acme-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        deploy_path: /data/work/{{ service_name }}/{{ inventory_hostname }}
+        # dingtalk 集群名
+        dingtalk_name: dingtalk_acme
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: alertmanager
+    # 部署路径
+    deploy_path: /home/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 端口偏移
+    port_delta: 0
+
+    # 监听端口
+    listen_port: "{{ 9093 + port_delta }}"
+    # docker 镜像 tag
+    docker_tag: v0.20.0

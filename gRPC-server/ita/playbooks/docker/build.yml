@@ -1,0 +1,17 @@
+# 构建 docker 镜像
+# @image_name: 需要构建的镜像名
+# @image_ver: 构建镜像的版本
+# @cluster: 构建集群
+---
+
+# 在 docker_builder[0] 服务器上构建镜像
+- name: build docker image
+  hosts: "{{ (groups[cluster] | shuffle)[0] }}"
+  tasks:
+    - name: build docker service
+      include_role:
+        name: docker-server/build
+      vars:
+        image_name: "{{ image_name }}"
+        image_ver: "{{ image_ver | default('latest') }}"
+        datacenter: "{{ hostvars[(groups[datacenter_name] | shuffle)[0]] }}"

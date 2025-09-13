@@ -1,0 +1,6 @@
+dependencies:
+  - role: common-server/pull-docker-image
+    vars:
+      docker_image:
+        name: timonwong/prometheus-webhook-dingtalk
+        tag: "{{ docker_tag }}"

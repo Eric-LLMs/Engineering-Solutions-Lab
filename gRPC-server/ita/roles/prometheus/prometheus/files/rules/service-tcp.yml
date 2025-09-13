@@ -1,0 +1,27 @@
+groups:
+  - name: service-tcp
+    rules:
+      - alert: 服务离线 > 5s
+        expr: probe_success{job='service-tcp',cluster=~'.+_(pre|production)'} == 0
+        for: 5s
+        labels:
+          severity: warning
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} {{ $labels.service }} 服务离线'
+      - alert: 服务离线 > 5min
+        expr: probe_success{job='service-tcp',cluster=~'.+_(pre|production)'} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} {{ $labels.service }} 服务离线超过 5 分钟，请尽快修复！'
+      - alert: 服务离线 > 1h
+        expr: probe_success{job='service-tcp'} == 0
+        for: 1h
+        labels:
+          severity: blocker
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} {{ $labels.service }} 服务离线超过 1 小时，请立即修复！！！'

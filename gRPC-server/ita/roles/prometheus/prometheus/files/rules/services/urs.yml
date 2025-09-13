@@ -1,0 +1,39 @@
+groups:
+  - name: urs-service-queue-size
+    rules:
+      - alert: 请求队列 > 50
+        expr: request_queue_size{cluster=~"urs_service_production"} > 50
+        for: 10s
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} 请求队列长度 > 50，且持续超过 10s'
+  - name: urs-service-tm
+    rules:
+      - alert: 单次请求耗时 > 1s
+        expr: sum(increase(request_time_cost_bucket{cluster=~"bs_service_production",api="search",le="+Inf"}[1m])) by (instance,api) - sum(increase(request_time_cost_bucket{cluster=~"bs_service_production",api="search",le="1e+06"}[1m])) by (instance,api) >= 1
+        for: 0s
+        labels:
+          severity: critical
+          team: algorithm-team-once
+        annotations:
+          summary: '{{ $labels.instance }} 单次 {{ $labels.api }} 请求耗时 > 1s'
+      - alert: 平均请求耗时 > 2s
+        expr: (sum(increase(request_time_cost_sum{cluster=~"urs_service_production",api=~"mit"}[15m])) by (instance,api) / sum(increase(request_time_cost_count{cluster=~"urs_service_production",api=~"mit"}[15m])) by (instance,api) > 2000000) and (sum(increase(request_time_cost_count{cluster=~"urs_service_production",api=~"mit"}[15m])) by (instance,api) >= 5)
+        for: 0s
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} 平均 {{ $labels.api }} 请求耗时 > 2s，且 15 分钟内请求数 >= 5'
+  - name: urs-service-fail
+    rules:
+      - alert: 失败率 >= 5%
+        expr: (1 - sum(increase(request_time_cost_count{cluster=~"urs_service_production",api=~"mit",rtn="0"}[1h])) by (instance,api) / sum(increase(request_time_cost_count{cluster=~"urs_service_production",api=~"mit"}[1h])) by (instance,api)) >= 0.05
+        for: 0s
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} {{ $labels.api }} 请求失败率 >= 5%'

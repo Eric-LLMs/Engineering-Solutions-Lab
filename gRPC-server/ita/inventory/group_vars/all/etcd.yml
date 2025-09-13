@@ -1,0 +1,26 @@
+# etcd 相关配置
+---
+
+# 内网 etcd
+etcd_intranet:
+  user: root
+  passwd:
+  servers:
+  - ip:
+    port:
+  - ip:
+    port:
+  - ip:
+    port:
+
+# acme etcd
+etcd_acme:
+  user:
+  passwd:
+  servers:
+  - ip:
+    port:
+  - ip:
+    port:
+  - ip:
+    port:

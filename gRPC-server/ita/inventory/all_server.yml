@@ -1,0 +1,61 @@
+# 所有服务器
+---
+
+all_server:
+  children:
+    # 内网服务器
+    all_server_intranet:
+      hosts:
+        192.168.0.125:
+        192.168.0.126:
+        192.168.0.152:
+          with_gpu: true
+        192.168.0.221:
+          with_gpu: true
+        192.168.0.249:
+          with_gpu: true
+        192.168.1.57:
+        192.168.1.182:
+        192.168.1.185:
+
+      vars:
+        # 服务器所属集群
+        server_cluster: intranet
+        # supervisor 配置
+        supervisor: "{{ supervisor_intranet }}"
+        # prometheus 集群名
+        prometheus_name: prometheus_intranet
+
+    # acme
+    all_server_acme:
+      hosts:
+        192.168.0.45:
+        192.168.0.51:
+        192.168.0.54:
+        192.168.0.56:
+        192.168.0.65:
+        192.168.43.230:
+        192.168.178.212:
+        192.168.249.65:
+
+      vars:
+        # 服务器所属集群
+        server_cluster: acme
+        # supervisor 配置
+        supervisor: "{{ supervisor_acme }}"
+        # prometheus 集群名
+        prometheus_name: prometheus_acme
+
+  vars:
+    # ssh user
+    ansible_ssh_user: root
+    # ssh 端口
+    ansible_ssh_port: 22
+    # 工作路径
+    work_path: /home/work
+    # 是否带有显卡
+    with_gpu: false
+
+    # exporter 端口
+    node_exporter_port: 39100
+    gpu_exporter_port: 39104

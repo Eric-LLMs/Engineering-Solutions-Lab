@@ -1,0 +1,7 @@
+# 删除无用的 docker 镜像
+---
+
+# 删除无用docker镜像
+- name: remove none images
+  shell: docker rmi -f $(docker images --filter "dangling=true" -q --no-trunc) 2>/dev/null
+  ignore_errors: true

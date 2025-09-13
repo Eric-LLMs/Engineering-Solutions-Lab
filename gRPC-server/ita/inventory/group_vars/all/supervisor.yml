@@ -1,0 +1,28 @@
+# supervisor 相关配置
+---
+
+# 内网
+supervisor_intranet:
+  # 安装路径
+  install_path: /root/supervisor
+  # supervisor 版本
+  version: 4.2.1
+  # supervisor 用户名
+  username: ''
+  # supervisor 密码
+  passwd: ''
+  # supervisor 监听端口
+  listen_port: 19001
+
+# acme
+supervisor_acme:
+  # 安装路径
+  install_path: /root/supervisor
+  # supervisor 版本
+  version: 4.2.1
+  # supervisor 用户名
+  username: algorithm
+  # supervisor 密码
+  passwd:
+  # supervisor 监听端口
+  listen_port: 19001

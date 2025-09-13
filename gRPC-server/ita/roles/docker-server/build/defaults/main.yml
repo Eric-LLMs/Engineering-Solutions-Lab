@@ -1,0 +1,5 @@
+# docker镜像build临时路径
+docker_build_tmp: /tmp/{{ image_name }}/{{ image_ver }}
+
+# docker 构建的完整镜像名
+image_fullname: "algorithms/{{ image_name }}:{{ image_ver }}"

@@ -1,0 +1,39 @@
+# 向指定集群推送数据
+# @cluster: 集群名
+# @serial_list: 并行参数
+# @data_source: 当前路径
+# @data_dest: 数据目标
+# @delete_excluded: rsync --delete-excluded 参数
+---
+
+- name: push data to {{ cluster }}
+  gather_facts: false
+  hosts: '{{ cluster }}'
+  serial: "{{ serial_list | default(1) }}"
+  tasks:
+    # 推送数据
+    - name: create data directory
+      file:
+        dest: "{{ data_dest }}"
+        state: directory
+    - name: send data to {{ data_dest }}
+      synchronize:
+        src: "{{ data_source }}/"
+        dest: "{{ data_dest }}"
+        checksum: yes
+        compress: yes
+        rsync_opts:
+          - "--exclude=.*"
+          - "--ignore-errors"
+      when: delete_excluded is not defined or (not delete_excluded | bool)
+    - name: send data to {{ data_dest }}
+      synchronize:
+        src: "{{ data_source }}/"
+        dest: "{{ data_dest }}"
+        checksum: yes
+        compress: yes
+        rsync_opts:
+          - "--exclude=.*"
+          - "--ignore-errors"
+          - "--delete-excluded"
+      when: delete_excluded is defined and delete_excluded | bool

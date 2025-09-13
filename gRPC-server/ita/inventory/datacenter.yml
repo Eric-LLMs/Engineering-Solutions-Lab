@@ -1,0 +1,35 @@
+# 数据中心
+---
+
+datacenter_all:
+  children:
+    # 内网数据中心
+    datacenter_intranet:
+      hosts:
+        datacenter-192.168.0.125:
+          ansible_host: 192.168.0.125
+      vars:
+        ansible_user: work
+        ansible_port: 22
+        # 数据中心路径
+        data_path: /home/work/datacenter
+
+    # 阿里云数据中心
+    datacenter_acme:
+      hosts:
+        datacenter-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        ansible_user: root
+        ansible_port: 22
+        data_path: /data2/datacenter
+
+    # 阿里云数据中心（外网）
+    datacenter_acme_extranet:
+      hosts:
+        datacenter- :
+          ansible_host:  
+      vars:
+        ansible_user: root
+        ansible_port: 22
+        data_path: /data2/datacenter

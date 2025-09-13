@@ -1,0 +1,56 @@
+# elastic search 服务集群
+---
+
+elasticsearch_all:
+  children:
+    # 内网集群
+    elasticsearch_intranet:
+      hosts:
+        es_intranet-00-192.168.0.126:
+          ansible_host: 192.168.0.126
+        es_intranet-01-192.168.0.126:
+          ansible_host: 192.168.0.126
+          port_delta: 10
+        es_intranet-02-192.168.0.126:
+          ansible_host: 192.168.0.126
+          port_delta: 20
+
+    # 线上集群
+    elasticsearch_acme:
+      hosts:
+        es_acme-00-192.168.0.65:
+          ansible_host: 192.168.0.65
+        es_acme-01-192.168.0.65:
+          ansible_host: 192.168.0.65
+          port_delta: 10
+        es_acme-02-192.168.0.65:
+          ansible_host: 192.168.0.65
+          port_delta: 20
+        es_acme-03-192.168.0.65:
+          ansible_host: 192.168.0.65
+          port_delta: 30
+        es_acme-04-192.168.0.65:
+          ansible_host: 192.168.0.65
+          port_delta: 40
+      vars:
+        # 部署路径
+        deploy_path: /data2/elastic-search/{{ inventory_hostname }}
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: elastic-search
+    # 部署路径
+    deploy_path: /home/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 端口偏移
+    port_delta: 0
+    # 9200 端口映射
+    listen_port: "{{ 11920 + port_delta }}"
+    # docker 镜像 tag
+    docker_tag: 7.7.0
+
+    # 密码
+    passwd: 2pM5ucpXCsr792xNFyuktq3v

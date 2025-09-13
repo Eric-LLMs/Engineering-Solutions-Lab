@@ -1,0 +1,9 @@
+# 部署 logstash 服务集群
+---
+
+- name: deploy logstash
+  hosts: logstash_{{ cluster }}
+  tasks:
+    - name: deploy logstash
+      include_role:
+        name: logstash/deploy

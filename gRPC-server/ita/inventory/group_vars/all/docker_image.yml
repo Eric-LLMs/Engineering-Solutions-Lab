@@ -1,0 +1,5 @@
+# docker 容器相关变量
+---
+
+# docker 容器 root 密码（内部构建的 docker 镜像使用该密码作为 root 密码）
+docker_image_root_passwd:

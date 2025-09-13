@@ -1,0 +1,11 @@
+groups:
+  - name: bs-service-tm
+    rules:
+      - alert: 单次请求耗时 > 5s
+        expr: sum(increase(request_time_cost_bucket{cluster=~"bs_service_production",api="search",le="+Inf"}[1m])) by (instance,api) - sum(increase(request_time_cost_bucket{cluster=~"bs_service_production",api="search",le="5e+06"}[1m])) by (instance,api) >= 1
+        for: 0s
+        labels:
+          severity: critical
+          team: algorithm-team-once
+        annotations:
+          summary: '{{ $labels.instance }} 单次 {{ $labels.api }} 请求耗时 > 5s'

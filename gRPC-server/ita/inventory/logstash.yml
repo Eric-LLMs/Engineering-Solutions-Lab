@@ -1,0 +1,40 @@
+# logstash 服务集群
+---
+
+logstash_all:
+  children:
+    # 内网集群
+    logstash_intranet:
+      hosts:
+        logstash_intranet-192.168.0.126:
+          ansible_host: 192.168.0.126
+      vars:
+        # es 集群名
+        elasticsearch_name: elasticsearch_intranet
+
+    # acme集群
+    logstash_acme:
+      hosts:
+        logstash_acme-00-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        # 部署路径
+        deploy_path: /data2/work/{{ service_name }}/{{ inventory_hostname }}
+        # es 集群名
+        elasticsearch_name: elasticsearch_acme
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: logstash
+    # 部署路径
+    deploy_path: /home/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 端口偏移
+    port_delta: 0
+    # 服务监听端口
+    listen_port: "{{ 10544 + port_delta }}"
+    # docker 镜像 tag
+    docker_tag: 7.7.0

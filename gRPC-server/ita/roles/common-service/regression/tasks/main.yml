@@ -1,0 +1,50 @@
+# 回归
+# @allure_path [optional]: allure结果路径
+# @pwd: 当前路径
+# @deploy_path: 服务部署路径
+---
+
+- name: remove {{ allure_path }} directory
+  file:
+    dest: "{{ path }}/{{ allure_path }}"
+    state: absent
+- name: remove {{ allure_path }} local directory
+  connection: local
+  file:
+    dest: "{{ pwd }}/{{ allure_path }}"
+    state: absent
+- name: pytest
+  shell: pytest --alluredir ../../{{ allure_path }} {{ pytest_extra | default('') }}
+  args:
+    chdir: "{{ path }}/test/cases"
+  register: pytest_check
+  ignore_errors: true
+  changed_when: pytest_check.rc | int != 0
+
+# 删除本地过时的容器主机信息
+- name: remove obsolete known_hosts on local server
+  connection: local
+  known_hosts:
+    name: "[{{ ansible_host }}]:{{ ssh_port }}"
+    state: absent
+
+# 设置与容器 root 账号的信任关系
+- name: set ssh-copyid to root
+  authorized_key:
+    user: root
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    state: present
+
+- name: get pytest reports from servers
+  synchronize:
+    mode: pull
+    src: "{{ path }}/{{ allure_path }}/"
+    dest: "{{ pwd }}/{{ allure_path }}"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+      - "--ignore-errors"
+- name: pytest failed
+  fail:
+    msg: pytest failed in some server(s)
+  when: pytest_check.rc | int != 0

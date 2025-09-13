@@ -1,0 +1,39 @@
+# up rules
+groups:
+  - name: up
+    rules:
+      - alert: 服务监控离线 > 30s
+        expr: up{job="service-tcp",cluster=~'.+_(pre|production)'} == 0
+        for: 30s
+        labels:
+          severity: warning
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} - {{ $labels.job }} 服务端口监控离线超过 30s'
+      - alert: 服务监控离线 > 1h
+        expr: up{job="service-tcp",cluster=~'.+_(pre|production)'} == 0
+        for: 1h
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} - {{ $labels.job }} 服务端口监控离线超过 1h'
+
+  - name: db_up
+    rules:
+      - alert: 服务监控离线 > 30s
+        expr: up{job="database"} == 0
+        for: 30s
+        labels:
+          severity: warning
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} - {{ $labels.job }} 数据库端口监控离线超过 30s'
+      - alert: 服务监控离线 > 1h
+        expr: up{job="database"} == 0
+        for: 1h
+        labels:
+          severity: critical
+          team: algorithm-team
+        annotations:
+          summary: '{{ $labels.instance }} - {{ $labels.job }} 数据库端口监控离线超过 1h'

@@ -1,0 +1,33 @@
+# 部署 prometheus 服务
+---
+# 创建目录
+- name: create service directory
+  file:
+    dest: "{{ deploy_path }}"
+    state: directory
+
+# 同步配置
+- name: deploy files
+  template:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}/{{ item }}"
+  loop:
+  - config.yml
+  - feishu.tmpl
+
+# 启动 alertmanager 服务
+- name: start alertmanager container
+  docker_container:
+    name: alertmanager
+    image: prom/alertmanager:{{ docker_tag }}
+    state: started
+    volumes:
+      - "{{ deploy_path }}/config.yml:/etc/alertmanager/config.yml"
+      - "{{ deploy_path }}/alertmanager:/alertmanager"
+      - "/usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro"
+    user: root
+    ports:
+      - "{{ listen_port }}:9093"
+    recreate: yes
+    restart_policy: always
+    command: --config.file=/etc/alertmanager/config.yml --storage.path=/alertmanager --web.external-url=http://{{ ansible_host }}:{{ listen_port }} --cluster.advertise-address=0.0.0.0:9093

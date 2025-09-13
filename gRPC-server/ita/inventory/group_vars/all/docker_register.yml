@@ -1,0 +1,33 @@
+# docker register 相关变量
+---
+
+# 内网 register
+docker_register_intranet:
+  # register ip 地址
+  ip:
+  # register 公网ip 地址
+  ip_extranet:
+  # register 用户名
+  username:
+  # register 密码
+  passwd:
+# 内网 register
+docker_register_intranet_2:
+  # register ip 地址
+  ip:
+  # register 公网ip 地址
+  ip_extranet:
+  # register 用户名
+  username:
+  # register 密码
+  passwd:
+# acme register
+docker_register_acme:
+  # register ip 地址
+  ip:
+  # register 公网ip 地址
+  ip_extranet:
+  # register 用户名
+  username:
+  # register 密码
+  passwd:

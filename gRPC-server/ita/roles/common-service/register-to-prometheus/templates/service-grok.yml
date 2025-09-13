@@ -1,0 +1,10 @@
+# prometheus service discovery
+---
+
+- targets:
+  - {{ ansible_host }}:{{ grok_exporter_port }}
+  labels:
+    service: {{ service_name }}
+    cluster: {{ group_names[1] }}
+    instance: {{ inventory_hostname }}:{{ service_port }}
+    host: {{ ansible_host }}

@@ -1,0 +1,31 @@
+# 部署prometheus组件
+# @cluster: intranet/acme
+---
+
+# dingtalk
+- name: deploy dingtalk
+  hosts: dingtalk_{{ cluster }}
+  tasks:
+    - name: deploy prometheus-webhook-dingtalk
+      include_role:
+        name: prometheus/prometheus-webhook-dingtalk
+
+# alertmanager
+- name: deploy alert-manager
+  hosts: alertmanager_{{ cluster }}
+  gather_facts: false
+  remote_user: root
+  tasks:
+    - name: deploy alertmanager
+      include_role:
+        name: prometheus/alertmanager
+
+# prometheus
+- name: deploy prometheus
+  hosts: prometheus_{{ cluster }}
+  gather_facts: false
+  remote_user: root
+  tasks:
+    - name: deploy prometheus
+      include_role:
+        name: prometheus/prometheus

@@ -1,0 +1,7 @@
+# 删除无用的 docker volume
+---
+
+# 删除无用docker volume
+- name: remove none volumes
+  shell: docker volume rm $(docker volume ls -qf dangling=true)
+  ignore_errors: true

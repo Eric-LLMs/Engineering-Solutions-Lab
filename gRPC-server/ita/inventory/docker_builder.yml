@@ -1,0 +1,26 @@
+# docker-build服务器，用来构建docker镜像
+---
+
+docker_builder:
+  children:
+    # 内网集群
+    docker_builder_intranet:
+      hosts:
+        docker_builder-192.168.1.185:
+          ansible_host: 192.168.1.185
+      vars:
+        datacenter_name: datacenter_intranet
+        docker_register: "{{ docker_register_intranet }}"
+
+    # 阿里云集群
+    docker_builder_acme:
+      hosts:
+        docker_builder-192.168.0.56:
+          ansible_host: 192.168.0.56
+      vars:
+        datacenter_name: datacenter_acme
+        docker_register: "{{ docker_register_acme }}"
+
+  vars:
+    ansible_user: root
+    ansible_port: 22

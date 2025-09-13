@@ -1,0 +1,3 @@
+dependencies:
+  # 安装python3
+  - role: common-server/install-supervisord

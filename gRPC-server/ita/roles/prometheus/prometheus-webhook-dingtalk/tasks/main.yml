@@ -1,0 +1,34 @@
+# 部署 webhook-dingtalk 服务
+---
+
+# 创建目录
+- name: create service directory
+  file:
+    dest: "{{ deploy_path }}"
+    state: directory
+
+# 同步相关数据
+- name: rsync configs -> {{ deploy_path }}
+  synchronize:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}"
+    checksum: yes
+    compress: yes
+  loop:
+    - prometheus-webhook-dingtalk.tmpl
+
+# 启动prometheus-webhook-dingtalk
+- name: start webhook-dingtalk
+  docker_container:
+    name: prometheus-webhook-dingtalk
+    image: timonwong/prometheus-webhook-dingtalk:{{ docker_tag }}
+    state: started
+    user: root
+    volumes:
+      - "{{ deploy_path }}/prometheus-webhook-dingtalk.tmpl:/prometheus-webhook-dingtalk.tmpl"
+      - "/usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro"
+    ports:
+      - "{{ listen_port }}:8060"
+    recreate: yes
+    restart_policy: always
+    command: --ding.profile="webhook1=https://oapi.dingtalk.com/robot/send?access_token={{ dingding_access_token }}" --template.file="/prometheus-webhook-dingtalk.tmpl" --ding.timeout=5s

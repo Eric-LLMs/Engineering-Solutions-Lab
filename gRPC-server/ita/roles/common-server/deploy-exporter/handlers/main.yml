@@ -1,0 +1,7 @@
+# reread supervisor
+- name: reread supervisor
+  shell: supervisorctl -c {{ supervisor.install_path }}/supervisord.conf -u {{ supervisor.username }} -p {{ supervisor.passwd }} reread
+
+# update supervisor
+- name: update supervisor
+  shell: supervisorctl -c {{ supervisor.install_path }}/supervisord.conf -u {{ supervisor.username }} -p {{ supervisor.passwd }} update

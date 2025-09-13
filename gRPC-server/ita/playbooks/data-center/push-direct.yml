@@ -1,0 +1,15 @@
+# 向指定集群推送数据
+# @cluster: 集群名
+# @serial_list: 并行参数
+# @data_source: 当前路径
+# @data_dest: 数据目标
+# @delete_excluded: rsync --delete-excluded 参数
+---
+
+- name: push data to data-center
+  hosts: '{{ datacenter }}'
+  tasks:
+    # 推送数据
+    - name: push data to data-center
+      include_role:
+        name: datacenter/push-direct

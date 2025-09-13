@@ -1,0 +1,26 @@
+groups:
+  - name: service-node
+    rules:
+      # 服务器内存不足
+      - alert: '服务器内存不足: < 1GB'
+        expr: node_memory_MemAvailable_bytes{job='service-node'} < 1024 * 1024 * 1024
+        for: 5s
+        labels:
+          severity: critical
+        annotations:
+          summary: '{{ $labels.instance }} 可用内存不足 1GB'
+      - alert: '服务器内存不足: < 512MB'
+        expr: node_memory_MemAvailable_bytes{job='service-node'} < 512 * 1024 * 1024
+        for: 0s
+        labels:
+          severity: blocker
+        annotations:
+          summary: '{{ $labels.instance }} 可用内存不足 512MB'
+      # 磁盘不足
+      - alert: '服务器硬盘不足: < 1GB'
+        expr: avg(node_filesystem_avail_bytes{mountpoint=~"/home/.*",fstype=~"ext4|xfs"}) by (instance) < 1024 * 1024 * 1024
+        for: 5s
+        labels:
+          severity: blocker
+        annotations:
+          summary: '{{ $labels.instance }} 可用硬盘不足 1GB'

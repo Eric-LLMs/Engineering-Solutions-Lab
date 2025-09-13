@@ -1,0 +1,8 @@
+# 停止 supervisor
+- name: stop supervisor
+  shell: supervisorctl -c {{ supervisor.install_path }}/supervisord.conf -u {{ supervisor.username }} -p {{ supervisor.passwd }} shutdown
+  ignore_errors: true
+
+# 启动 supervisor
+- name: start supervisor
+  shell: supervisord -c {{ supervisor.install_path }}/supervisord.conf

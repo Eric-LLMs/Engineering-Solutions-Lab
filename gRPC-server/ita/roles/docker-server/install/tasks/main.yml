@@ -1,0 +1,40 @@
+# 安装 docker 服务
+---
+
+- name: upload setdaemon.py
+  copy:
+    src: setdaemon.py
+    dest: /tmp/
+    mode: '755'
+# 设置 /etc/docker/daemon.json
+- name: set docker daemon
+  shell: /tmp/setdaemon.py
+  register: setdaemon_result
+  changed_when: setdaemon_result.rc == 1
+  failed_when: setdaemon_result.rc != 0 and setdaemon_result.rc != 1
+- name: remove setdaemon.py
+  file:
+    dest: /tmp/setdaemon.py
+    state: absent
+# 检查docker是否安装，如果未安装，则安装 docker
+- name: check whether docker installed
+  shell: which docker 2>/dev/null
+  register: check_result
+  changed_when: check_result.rc != 0
+  ignore_errors: true
+# 安装 docker 服务
+- name: install docker service
+  shell: curl -sSL https://get.daocloud.io/docker | sh
+  when: check_result.rc != 0
+# 启动docker服务
+- name: start docker service
+  service:
+    name: docker
+    state: started
+  when: check_result.rc != 0
+# 如果check_result.rc == 0, 但是 setdaemon_result.rc == 1，说明docker服务已安装，但是配置发生了修改，此时重启
+- name: restart docker service
+  service:
+    name: docker
+    state: restarted
+  when: check_result.rc == 0 and setdaemon_result.rc == 1

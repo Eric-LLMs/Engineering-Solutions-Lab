@@ -1,0 +1,83 @@
+global:
+  scrape_interval: 5s # 设置抓取间隔
+  evaluation_interval: 5s # 设置规则计算间隔
+  scrape_timeout: 4s  # 抓取超时
+
+# alert manager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+      - targets:
+{% for one in groups[ alertmanager_name ] %}
+{% set var = hostvars[ one ] %}
+        - {{ var.ansible_host }}:{{ var.listen_port }}
+{% endfor %}
+
+# evalution rules
+rule_files:
+  - rules/*.yml
+  - rules/services/*.yml
+
+scrape_configs:
+  # prometheus 服务
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - '{{ ansible_host }}:9090'
+        labels:
+          instance: prometheus
+    scrape_interval: 10s
+
+  # 服务端口监控
+  - job_name: service-tcp
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/service-tcp-*.yml
+      refresh_interval: 5s
+    relabel_configs:
+      - source_labels: [listen_port]
+        target_label: __param_target
+        replacement: 127.0.0.1:$1
+      - regex: 'listen_port'
+        action: labeldrop
+
+  # 服务器硬件监控
+  - job_name: service-node
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/service-node-*.yml
+      refresh_interval: 5s
+    scrape_interval: 10s
+
+  # 服务日志监控
+  - job_name: service-grok
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/service-grok-*.yml
+      refresh_interval: 5s
+
+  # 服务进程监控
+  - job_name: service-process
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/service-process-*.yml
+      refresh_interval: 5s
+
+  # gpu 硬件监控
+  - job_name: service-gpu
+    metrics_path: /
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/service-gpu-*.yml
+      refresh_interval: 5s
+    scrape_interval: 10s
+
+  # 数据库监控
+  - job_name: database
+    file_sd_configs:
+    - files:
+      - /etc/prometheus/sd/database-*.yml
+      refresh_interval: 5s

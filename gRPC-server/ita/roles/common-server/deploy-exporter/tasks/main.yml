@@ -1,0 +1,46 @@
+# 安装node/gpu exporter
+---
+
+- name: create {{ exporter_path }} directory
+  file:
+    dest: "{{ exporter_path }}"
+    state: directory
+
+# 部署node_exporter
+- name: upload node_exporter
+  copy:
+    src: node_exporter
+    dest: "{{ exporter_path }}"
+    mode: '0777'
+  notify:
+  - reread supervisor
+  - update supervisor
+- name: config node_exporter-supervisord.conf
+  copy:
+    src: node_exporter-supervisord.conf
+    dest: "{{ supervisor.install_path }}/daemon"
+  notify:
+  - reread supervisor
+  - update supervisor
+
+# 部署gpu_exporter
+- name: upload gpu_exporter
+  copy:
+    src: gpu_exporter
+    dest: "{{ exporter_path }}"
+    mode: '0777'
+  notify:
+  - reread supervisor
+  - update supervisor
+  when: with_gpu
+- name: config gpu_exporter-supervisord.conf
+  copy:
+    src: gpu_exporter-supervisord.conf
+    dest: "{{ supervisor.install_path }}/daemon"
+  notify:
+  - reread supervisor
+  - update supervisor
+  when: with_gpu
+
+- name: flush handlers
+  meta: flush_handlers

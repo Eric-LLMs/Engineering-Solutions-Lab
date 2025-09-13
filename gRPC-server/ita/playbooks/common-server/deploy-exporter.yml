@@ -1,0 +1,32 @@
+# 部署exporter
+---
+
+- name: deploy exporters to server(s)
+  hosts: "{{ servers }}"
+  serial: 4
+  tasks:
+    - name: deploy exporters
+      include_role:
+        name: common-server/deploy-exporter
+
+    # 注册到prometheus
+    - name: register to prometheus
+      include_role:
+        name: common-service/register-to-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-node
+      loop_control:
+        loop_var: sd_prefix
+    - name: register to prometheus
+      include_role:
+        name: common-service/register-to-prometheus
+      vars:
+        prometheus: "{{ prometheus_name }}"
+      loop:
+        - service-gpu
+      loop_control:
+        loop_var: sd_prefix
+      when: with_gpu
+

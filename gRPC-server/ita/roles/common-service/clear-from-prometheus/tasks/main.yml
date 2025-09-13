@@ -1,0 +1,12 @@
+# 注销 prometheus 自动服务发现
+---
+
+- name: clear sd files
+  delegate_to: "{{ item }}"
+  shell: rm -rf {{ delegate_vars.deploy_path }}/sd/{{ sd_prefix }}-{{ group_names[-1] }}-*.yml
+  args:
+    warn: false
+  loop: "{{ groups[ prometheus ] }}"
+  vars:
+    delegate_vars: "{{ hostvars[ item ] }}"
+  ignore_errors: true

@@ -1,0 +1,4 @@
+# 服务相关日志 pattern
+
+# 分隔/TEXT
+TEXT_OR_SEP ( | .+? )

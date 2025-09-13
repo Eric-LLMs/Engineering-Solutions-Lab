@@ -1,0 +1,7 @@
+# pip 源
+pip_source:
+  # acme pip 源
+  acme: https://mirrors.acme.com/pypi/simple/
+
+# 钉钉 access token，用于向钉钉发送消息，对应算法组
+acme_access_token:

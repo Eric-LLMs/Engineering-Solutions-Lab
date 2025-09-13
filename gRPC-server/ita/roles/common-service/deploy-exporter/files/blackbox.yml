@@ -1,0 +1,12 @@
+# blackbox exporter配置
+modules:
+    http_2xx:
+        prober: http
+        http:
+    http_post_2xx:
+        prober: http
+        http:
+            method: POST
+    tcp_connect:
+        prober: tcp
+

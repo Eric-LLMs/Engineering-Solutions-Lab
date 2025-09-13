@@ -1,0 +1,10 @@
+# 安装 docker 服务
+---
+
+- name: install docker service on remote servers
+  hosts: "{{ servers }}"
+  remote_user: root
+  tasks:
+    - name: install docker service
+      include_role:
+        name: docker-server/install

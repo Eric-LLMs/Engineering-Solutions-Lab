@@ -1,0 +1,31 @@
+# 从本地向 data-center 推送数据
+# @data_source: 需要推送的数据路径
+# @data_dest: 数据目标
+# @delete_excluded: 0/1
+---
+# 推送数据
+- name: create data directory
+  file:
+    dest: "{{ data_path }}/{{ data_dest }}"
+    state: directory
+- name: send data to data-center
+  synchronize:
+    src: "{{ data_source }}/"
+    dest: "{{ data_path }}/{{ data_dest }}"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+      - "--exclude=.*"
+      - "--ignore-errors"
+  when: delete_excluded is not defined or (not delete_excluded | bool)
+- name: send data to data-center
+  synchronize:
+    src: "{{ data_source }}/"
+    dest: "{{ data_path }}/{{ data_dest }}"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+      - "--exclude=.*"
+      - "--ignore-errors"
+      - "--delete-excluded"
+  when: delete_excluded is defined and delete_excluded | bool

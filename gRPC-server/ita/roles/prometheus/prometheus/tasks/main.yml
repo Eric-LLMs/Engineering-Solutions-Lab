@@ -1,0 +1,48 @@
+# 部署 prometheus 服务
+---
+
+# 创建目录
+- name: create service directory
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ deploy_path }}"
+    - "{{ deploy_path }}/prometheus"
+    - "{{ deploy_path }}/sd"
+
+# 同步相关数据
+- name: rsync template configs -> {{ deploy_path }}
+  template:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}"
+  loop:
+    - prometheus.yml
+
+- name: rsync configs -> {{ deploy_path }}
+  synchronize:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}"
+    checksum: yes
+    compress: yes
+  loop:
+    - rules
+
+# 启动 prometheus
+- name: start prometheus container
+  docker_container:
+    name: prometheus
+    image: prom/prometheus:{{ docker_tag }}
+    state: started
+    volumes:
+      - "{{ deploy_path }}/prometheus:/prometheus"
+      - "{{ deploy_path }}/sd:/etc/prometheus/sd"
+      - "{{ deploy_path }}/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "{{ deploy_path }}/rules:/etc/prometheus/rules"
+      - "/usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro"
+    user: root
+    ports:
+      - "{{ listen_port }}:9090"
+    recreate: yes
+    restart_policy: always
+    command: --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/prometheus --web.console.libraries=/usr/share/prometheus/console_libraries --web.console.templates=/usr/share/prometheus/consoles --web.external-url=http://{{ ansible_host }}:{{ listen_port }}

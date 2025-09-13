@@ -1,0 +1,23 @@
+# ssh-copy-id
+---
+
+- name: set ssh-copy-id to server(s)
+  gather_facts: false
+  hosts: all
+  user: root
+  serial: 1
+  tasks:
+    - name: install sshpass locally
+      connection: local
+      yum:
+        name:
+          - sshpass
+        state: present
+    - name: ssh-copy-id
+      authorized_key:
+        user: root
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        state: present
+      vars:
+        ansible_ssh_pass: "{{ ssh_passwd | default('') }}"
+        ansible_port: "{{ ssh_port | default(22) }}"

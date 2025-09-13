@@ -1,0 +1,7 @@
+# prometheus service discovery
+---
+
+- targets:
+  - {{ inventory_hostname }}:{{ node_exporter_port }}
+  labels:
+    instance: {{ inventory_hostname }}

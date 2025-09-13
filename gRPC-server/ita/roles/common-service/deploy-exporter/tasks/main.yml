@@ -1,0 +1,44 @@
+# 安装服务监控 exporter可执行文件
+---
+
+- name: create {{ exporter_path }} directory
+  file:
+    dest: "{{ exporter_path }}"
+    state: directory
+
+# 部署grok_exporter
+- name: upload grok_exporter
+  copy:
+    src: grok_exporter
+    dest: "{{ exporter_path }}"
+    mode: '0777'
+
+# 部署grok patterns
+- name: config grok patterns
+  copy:
+    src: grok-patterns
+    dest: "{{ exporter_path }}"
+
+# 部署process_exporter
+- name: upload process_exporter
+  copy:
+    src: process_exporter
+    dest: "{{ exporter_path }}"
+    mode: '0777'
+
+# 部署blackbox_exporter
+- name: upload blackbox_exporter
+  copy:
+    src: blackbox_exporter
+    dest: "{{ exporter_path }}"
+    mode: '0777'
+
+- name: config blackbox.yml
+  copy:
+    src: blackbox.yml
+    dest: "{{ exporter_path }}"
+
+- name: config blackbox_exporter-supervisord.conf
+  template:
+    src: blackbox_exporter-supervisord.conf
+    dest: "{{ supervisor.install_path }}/daemon/"

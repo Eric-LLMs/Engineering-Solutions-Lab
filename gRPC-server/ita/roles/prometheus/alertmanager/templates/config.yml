@@ -1,0 +1,132 @@
+global:
+  resolve_timeout: 1m
+
+# 路由配置
+route:
+  receiver: admin
+  # alertname: 警报名, instance: 服务器
+  group_by: ['alertname', 'instance', 'severity']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 1d
+  routes:
+    - receiver: algorithm-team
+      match:
+        team: algorithm-team
+      routes:
+        - match:
+            severity: blocker
+          group_wait: 5s
+          group_interval: 5s
+          repeat_interval: 30m
+        - match:
+            severity: critical
+          group_wait: 5s
+          group_interval: 10s
+          repeat_interval: 2h
+        - match:
+            severity: warning
+          group_wait: 5s
+          group_interval: 15s
+          repeat_interval: 12h
+    - receiver: algorithm-team-once
+      match:
+        team: algorithm-team-once
+      routes:
+        - match:
+            severity: blocker
+          group_wait: 5s
+          group_interval: 5s
+          repeat_interval: 30m
+        - match:
+            severity: critical
+          group_wait: 5s
+          group_interval: 10s
+          repeat_interval: 2h
+        - match:
+            severity: warning
+          group_wait: 5s
+          group_interval: 15s
+          repeat_interval: 12h
+
+# 告警抑制
+inhibit_rules:
+  # 服务器监控指标
+  - source_match:
+      type: server
+      severity: blocker
+    target_match:
+      type: server
+      severity: critical, warning, notice
+    equal: [ 'hostname', 'alertname' ]
+  - source_match:
+      type: server
+      severity: critical
+    target_match:
+      type: server
+      severity: warning, notice
+    equal: [ 'hostname', 'alertname' ]
+  - source_match:
+      type: server
+      severity: warning
+    target_match:
+      type: server
+      severity: notice
+    equal: [ 'hostname', 'alertname' ]
+
+  # 服务监控指标
+  - source_match:
+      type: service
+      severity: blocker
+    target_match:
+      type: service
+      severity: critical, warning, notice
+    equal: ['alertname', 'instance']
+  - source_match:
+      type: service
+      severity: critical
+    target_match:
+      type: service
+      severity: warning, notice
+    equal: ['alertname', 'instance']
+  - source_match:
+      type: service
+      severity: warning
+    target_match:
+      type: service
+      severity: notice
+    equal: ['alertname', 'instance']
+
+# 告警接收
+receivers:
+  # 管理员
+  - name: admin
+    webhook_configs:
+{% for one in groups[ dingtalk_name ] %}
+{% set var = hostvars[ one ] %}
+      - send_resolved: false
+        url: http://{{ var.ansible_host }}:{{ var.listen_port }}/dingtalk/webhook1/send
+{% endfor %}
+
+  # 算法团队 - 支持已解决告警
+  - name: algorithm-team
+    webhook_configs:
+{% for one in groups[ dingtalk_name ] %}
+{% set var = hostvars[ one ] %}
+      - send_resolved: true
+        url: http://{{ var.ansible_host }}:{{ var.listen_port }}/dingtalk/webhook1/send
+{% endfor %}
+      # - send_resolved: true
+      #   url: https://open.feishu.cn/open-apis/bot/v2/hook/d9c87fce-5fbd-4592-9c2f-9e29e1cfd761
+
+  # 算法团队 - 不支持已解决告警
+  - name: algorithm-team-once
+    webhook_configs:
+{% for one in groups[ dingtalk_name ] %}
+{% set var = hostvars[ one ] %}
+      - send_resolved: false
+        url: http://{{ var.ansible_host }}:{{ var.listen_port }}/dingtalk/webhook1/send
+{% endfor %}
+
+# templates:
+# - /etc/alertmanager/feishu.tmpl

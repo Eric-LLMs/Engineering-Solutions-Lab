@@ -1,0 +1,6 @@
+http.host: "0.0.0.0"
+xpack.monitoring.elasticsearch.hosts:
+{% for one in groups[elasticsearch_name] %}
+{% set var = hostvars[one] %}
+  - {{ var.ansible_host }}:{{ var.listen_port }}
+{% endfor %}

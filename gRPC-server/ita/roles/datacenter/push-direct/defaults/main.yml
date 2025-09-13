@@ -1,0 +1,4 @@
+# delete exclude
+delete_excluded: true
+# 是否拷贝软链接
+copy_links: false

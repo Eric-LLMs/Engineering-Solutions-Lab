@@ -1,0 +1,11 @@
+# 注册 prometheus 自动服务发现
+---
+
+- name: create sd file
+  delegate_to: "{{ item }}"
+  template:
+    src: "{{ sd_prefix }}.yml"
+    dest: "{{ delegate_vars.deploy_path }}/sd/{{ sd_prefix }}-{{ inventory_hostname }}.yml"
+  loop: "{{ groups[ prometheus ] }}"
+  vars:
+    delegate_vars: "{{ hostvars[ item ] }}"

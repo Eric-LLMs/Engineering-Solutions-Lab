@@ -1,0 +1,48 @@
+# 部署 logstash
+---
+
+- name: create {{ deploy_path }} directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ deploy_path }}"
+    - "{{ deploy_path }}/pipeline"
+
+# 配置文件
+- name: config logstash.yml
+  template:
+    src: logstash.yml
+    dest: "{{ deploy_path }}"
+
+- name: config logstash pipeline
+  template:
+    src: logstash.conf
+    dest: "{{ deploy_path }}/pipeline"
+
+- name: config grok-patterns
+  synchronize:
+    src: files/grok-patterns
+    dest: "{{ deploy_path }}"
+    checksum: yes
+    compress: yes
+    rsync_opts:
+      - "--ignore-errors"
+      - "--delete-excluded"
+
+# 启动 logstash
+- name: start logstash
+  docker_container:
+    name: logstash-{{ listen_port }}
+    image: logstash:{{ docker_tag }}
+    state: started
+    user: root
+    volumes:
+      - "{{ deploy_path }}/logstash.yml:/usr/share/logstash/config/logstash.yml"
+      - "{{ deploy_path }}/grok-patterns:/usr/share/logstash/grok-patterns"
+      - "{{ deploy_path }}/pipeline:/usr/share/logstash/pipeline"
+      - '/usr/share/zoneinfo/Asia/Shanghai:/etc/localtime:ro'
+    ports:
+      - "{{ listen_port }}:5044"
+    recreate: yes
+    restart_policy: always

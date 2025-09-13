@@ -1,0 +1,11 @@
+# prometheus service discovery
+---
+
+- targets:
+  - {{ ansible_host }}:{{ blackbox_exporter_port }}
+  labels:
+    service: {{ service_name }}
+    cluster: {{ group_names[1] }}
+    instance: {{ inventory_hostname }}:{{ service_port }}
+    listen_port: {{ listen_port }}
+    host: {{ ansible_host }}

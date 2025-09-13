@@ -1,0 +1,9 @@
+# prometheus service discovery
+---
+
+- targets:
+  - {{ ansible_host }}:{{ exporter_port + port_delta }}
+  labels:
+    database: {{ db_name }}
+    cluster: {{ group_names[1] }}
+    instance: {{ inventory_hostname }}:{{ physical_listen_port + port_delta }}

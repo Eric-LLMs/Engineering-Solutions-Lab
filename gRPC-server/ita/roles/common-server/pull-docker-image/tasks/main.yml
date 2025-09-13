@@ -1,0 +1,21 @@
+# 从 docker register 拉取 docker 镜像
+---
+
+# 登录 docker register
+- name: docker login
+  shell: docker login {{ docker_register.ip }} -u {{ docker_register.username }} -p {{ docker_register.passwd }}
+  when: docker_register is defined
+
+# 拉取镜像
+- name: pull docker image {{ docker_image.name }}:{{ docker_image.tag }}
+  docker_image:
+    name: "{{ docker_image.name }}"
+    tag: "{{ docker_image.tag }}"
+    state: present
+    source: pull
+    force_source: true
+
+# 删除无用 docker 镜像
+- name: remove none images
+  include_role:
+    name: common-server/remove-none-images

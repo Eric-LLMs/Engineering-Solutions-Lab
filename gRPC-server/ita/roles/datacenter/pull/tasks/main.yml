@@ -1,0 +1,26 @@
+# 从 data-center 获取数据到本地
+# @datacenter: 数据中心地址
+# @dest: 拉取数据的目标路径
+# @targets: 目标数据列表
+#   - name: ec_model
+#     version: 1.0
+#     dest: 本地路径
+# @copy_links [optional]: 是否拉取软链实际文件
+---
+# 创建本地数据路径，用于后面同步数据
+- name: create data directory
+  file:
+    dest: "{{ item.dest }}"
+    state: directory
+  loop: "{{ targets | default([]) }}"
+
+# 从数据中心同步数据
+- name: pull data from data-center
+  shell: rsync -avP --ignore-errors --exclude=".*" --delete-excluded {{ datacenter.ansible_user }}@{{ datacenter.ansible_host }}:{{ datacenter.data_path }}/{{ item.name }}/{{ item.version }}/ {{ item.dest }}
+  loop: "{{ targets | default([]) }}"
+  when: not copy_links
+
+- name: pull data from data-center
+  shell: rsync -avLP --ignore-errors --exclude=".*" --delete-excluded {{ datacenter.ansible_user }}@{{ datacenter.ansible_host }}:{{ datacenter.data_path }}/{{ item.name }}/{{ item.version }}/ {{ item.dest }}
+  loop: "{{ targets | default([]) }}"
+  when: copy_links

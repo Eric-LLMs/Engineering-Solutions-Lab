@@ -1,0 +1,15 @@
+# 安装 python3
+---
+
+# 安装 supervisor
+- name: install python by yum
+  yum:
+    name:
+      - python36
+      - python36-setuptools
+      - python36-pip
+    state: present
+  vars:
+    # 指定python解释器，如果不指定，容易失败
+    ansible_python_interpreter: /usr/bin/python2.7
+  when: ansible_pkg_mgr == 'yum'

@@ -1,0 +1,14 @@
+# pip3 安装
+# @pip_install_packages: 安装包，格式
+#   - numpy
+#   - pandas==1.0.0
+# @mode [optional]: root / user, 安装模式
+- name: install python3 packages
+  shell: python3 -m pip install {{ item }} -i {{ pip_source.acme }}
+  loop: "{{ pip_install_packages }}"
+  when: mode is not defined or mode == root
+
+- name: install python3 packages
+  shell: python3 -m pip install {{ item }} --user -i {{ pip_source.acme }}
+  loop: "{{ pip_install_packages }}"
+  when: mode is defined and mode == user

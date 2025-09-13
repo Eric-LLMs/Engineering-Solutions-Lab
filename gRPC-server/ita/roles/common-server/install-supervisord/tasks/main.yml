@@ -1,0 +1,33 @@
+# 安装 supervisord
+---
+
+# 安装 supervisor
+- name: install supervisor
+  pip:
+    name: supervisor=={{ supervisor.version }}
+    extra_args: -i {{ pip_source.acme }}
+    executable: pip3
+  notify:
+  - stop supervisor
+  - start supervisor
+
+# 创建路径
+- name: create directory
+  file:
+    dest: "{{ item }}"
+    state: directory
+  loop:
+  - "{{ supervisor.install_path }}"
+  - "{{ supervisor.install_path }}/daemon"
+
+# 设置 supervisor 配置
+- name: config supervisord.conf
+  template:
+    src: supervisord.conf
+    dest: "{{ supervisor.install_path }}"
+  notify:
+  - stop supervisor
+  - start supervisor
+
+- name: flush handlers
+  meta: flush_handlers

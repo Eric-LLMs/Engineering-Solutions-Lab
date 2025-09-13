@@ -1,0 +1,114 @@
+# 直播评论分析模型服务集群
+---
+
+# 服务集群
+live_comments_analysis_all:
+  children:
+    # 测试集群
+    live_comments_analysis_staging:
+      hosts:
+        live_comments_analysis_staging-00-00-192.168.0.221:
+          ansible_host: 192.168.0.221
+      vars:
+        # 服务集群
+        cluster_name: staging
+
+        # 服务使用镜像
+        docker:
+          register: "{{ docker_register_intranet }}"
+          image: algorithms/python-runtime
+          tag: tensorflow
+
+        # supervisor 配置
+        supervisor: "{{ supervisor_intranet }}"
+        # etcd 配置
+        etcd: "{{ etcd_intranet }}"
+        # 关联的 logstash 集群名
+        logstash_name: logstash_intranet
+        # 数据中心名
+        datacenter_name: datacenter_intranet
+        # prometheus 集群名
+        prometheus_name: prometheus_intranet
+
+    # 预发布集群
+    live_comments_analysis_pre:
+      hosts:
+        live_comments_analysis_pre-192.168.0.65:
+          ansible_host: 192.168.0.65
+      vars:
+        # 服务集群
+        cluster_name: pre
+
+        # 服务使用镜像
+        docker:
+          register: "{{ docker_register_acme }}"
+          image: algorithms/python-runtime
+          tag: tensorflow
+
+        # supervisor 配置
+        supervisor: "{{ supervisor_acme }}"
+        # etcd 配置
+        etcd: "{{ etcd_acme }}"
+        # 关联的 logstash 集群名
+        logstash_name: logstash_acme
+        # 数据中心名
+        datacenter_name: datacenter_acme
+        # prometheus 集群名
+        prometheus_name: prometheus_acme
+        # 物理部署路径
+        deploy_path: /data/work/{{ service_name }}/{{ inventory_hostname }}
+
+    # 产品集群
+    live_comments_analysis_production:
+      hosts:
+      vars:
+        # 服务集群
+        cluster_name: production
+
+        # 服务使用镜像
+        docker:
+          register: "{{ docker_register_acme }}"
+          image: algorithms/python-runtime
+          tag: tensorflow
+
+        # supervisor 配置
+        supervisor: "{{ supervisor_acme }}"
+        # etcd 配置
+        etcd: "{{ etcd_acme }}"
+        # 关联的 logstash 集群名
+        logstash_name: logstash_acme
+        # 数据中心名
+        datacenter_name: datacenter_acme
+        # prometheus 集群名
+        prometheus_name: prometheus_acme
+
+  vars:
+    # ansible user
+    ansible_user: root
+
+    # 服务名
+    service_name: live-comments-analysis
+    # 部署路径（docker）
+    path: /home/work/{{ service_name }}
+
+    # 服务监听端口
+    listen_port: 39375
+
+    # 物理部署路径
+    deploy_path: "{{ path }}/{{ inventory_hostname }}"
+
+    # 端口偏移，影响各物理机端口的实际值
+    port_delta: 0
+    # ssh 端口
+    ssh_port: "{{ 36422 + port_delta }}"
+    # 服务端口
+    service_port: "{{ listen_port + port_delta }}"
+    # supervisor 端口
+    supervisor_port: "{{ service_port | int + 1 }}"
+    # exporter 端口
+    grok_exporter_port: "{{ service_port | int + 3 }}"
+    blackbox_exporter_port: "{{ service_port | int + 4 }}"
+    process_exporter_port: "{{ service_port | int + 5 }}"
+
+    # docker 容器密码
+    docker_root_passwd:

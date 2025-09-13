@@ -1,0 +1,11 @@
+# 安装python3
+---
+
+- name: install python3 to server(s)
+  gather_facts: false
+  hosts: "{{ servers }}"
+  serial: 1
+  tasks:
+    - name: install python3
+      include_role:
+        name: common-server/install-python3
