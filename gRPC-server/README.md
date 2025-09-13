@@ -11,8 +11,8 @@ conda activate gRPC_server_py36_py36
 
 ### Clone the project 
 ```bash
-git@192.168.1.78:model-services/live-comments-analysis.git
-cd live-comments-analysis
+git download gRPC-server
+cd gRPC-server
 # 下载依赖项目
 git submodule update --init
 cd framework
@@ -44,7 +44,7 @@ python client.py
 ```
 
 # 2. Adding a New Service   
-### To add a new gRPC service implementation, follow these steps:
+## To add a new gRPC service implementation, follow these steps:
 - Create a new service implementation under the directory:
 ``` 
   gRPC-server/ita/inventory/services/  
