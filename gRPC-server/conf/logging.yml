@@ -1,0 +1,55 @@
+# logging 日志配置
+---
+
+version: 1
+disable_existing_loggers: false
+
+formatters:
+    simple:
+        format: "%(levelname)s: %(asctime)s: [%(filename)s:%(lineno)d] %(message)s"
+        datefmt: '%Y-%m-%d %H:%M:%S'
+    full:
+        format: "%(levelname)s: %(asctime)s: [%(name)s:%(filename)s:%(lineno)d] %(message)s"
+
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: full
+
+    grok_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: full
+        filename: log/grok.log
+        maxBytes: 104
+        encoding: utf8
+
+    file_handler:
+        class: framework.DebugRotatingFileHandler
+        level: INFO
+        formatter: full
+        filename: log/server.log
+        maxBytes: 104857600
+        encoding: utf8
+
+loggers:
+    # block matplotlib debug logging
+    matplotlib:
+        level: INFO
+    # block py.warnings warning logging
+    py.warnings:
+        level: ERROR
+    # tensorflow
+    tensorflow:
+        level: ERROR
+    # urllib3
+    urllib3:
+        level: INFO
+
+root:
+    level: DEBUG
+    handlers:
+        - console
+        - grok_handler
+        - file_handler

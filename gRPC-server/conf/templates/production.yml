@@ -1,0 +1,19 @@
+# 产品环境配置
+---
+
+num_workers: 3
+
+albert_version: 1.0
+lgb_version: 1.0
+jieba_version: 1.0
+
+albert_config_path: 'data/albert/albert_config_small_google.json'
+albert_checkpoint_path: 'data/albert/albert_model.ckpt'
+albert_dict_path: 'data/albert/vocab.txt'
+lgb_path: 'data/lightGBM/lgb.mdl'
+threshold: 0.32
+# 过期时间小时
+redis_expiration_time: 4
+
+# 结构化提取层并发数
+analyzer_layer_cpu: 1

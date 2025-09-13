@@ -1,0 +1,56 @@
+# 日志目录
+logDir: {{ logDir | default('log') }}
+
+# 服务接口
+interfaces:
+  grpc:
+    class: framework.interface.GrpcInterface
+    args:
+      # grpc 监听端口
+      listen_port: {{ listen_port | default(39375) }}
+      # listen_port: {{ listen_port | default(30003) }}
+      # grpc 线程池大小
+      num_workers: {{ num_workers | default(4) }}
+      # 服务
+      services:
+        # 服务名
+        CommentAnalyzerService:
+          # 服务实现类
+          class: src.comment_analyzer_service.CommentAnalyzerService
+
+layers:
+  analyzer:
+    class: src.layers.analyzer.AnalyzerLayer
+    cpu: {{ analyzer_layer_cpu | default(1) }}
+    args:
+        # 模型路径
+        albert_config_path: {{ albert_config_path | default('data/albert/albert_config_small_google.json') }}
+        albert_checkpoint_path: {{ albert_checkpoint_path | default('data/albert/albert_model.ckpt') }}
+        albert_dict_path: {{ albert_dict_path | default('data/albert/vocab.txt') }}
+        lgb_path: {{ lgb_path | default('data/lightGBM/lgb.mdl') }}
+        threshold: {{ threshold | default(0.32) }}
+        redis_expiration_time: {{ redis_expiration_time | default(4) }}
+        redis_ip: {{ redis_ip | default('192.168.1.56') }}
+        redis_port: {{ redis_port | default(7001) }}
+        redis_pwd: {{ redis_pwd | default('fq9YesajeqxcLxs') }}
+        # redis_ip: {{ redis_ip | default('127.0.0.1') }}
+        # redis_port: {{ redis_port | default(6379) }}
+        # redis_pwd: {{ redis_pwd | default('123abcABC') }}
+
+  cluster:
+    class: src.layers.cluster.ClusterLayer
+    cpu: {{ cluster_layer_cpu | default(1) }}
+    args:
+        # 模型路径
+        albert_config_path: {{ albert_config_path | default('data/albert/albert_config_small_google.json') }}
+        albert_checkpoint_path: {{ albert_checkpoint_path | default('data/albert/albert_model.ckpt') }}
+        albert_dict_path: {{ albert_dict_path | default('data/albert/vocab.txt') }}
+        lgb_path: {{ lgb_path | default('data/lightGBM/lgb.mdl') }}
+        threshold: {{ threshold | default(0.32) }}
+        redis_expiration_time: {{ redis_expiration_time | default(4) }}
+        redis_ip: {{ redis_ip | default('192.168.1.56') }}
+        redis_port: {{ redis_port | default(7001) }}
+        redis_pwd: {{ redis_pwd | default('fq9YesajeqxcLxs') }}
+        # redis_ip: {{ redis_ip | default('127.0.0.1') }}
+        # redis_port: {{ redis_port | default(6379) }}
+        # redis_pwd: {{ redis_pwd | default('123abcABC') }}

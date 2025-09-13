@@ -1,0 +1,24 @@
+# etcd 集群地址
+etcd:
+{% for one in etcd.servers %}
+  - ip: {{ one.ip }}
+    port: {{ one.port }}
+    user: {{ etcd.user }}
+    passwd: {{ etcd.passwd }}
+{% endfor %}
+
+# 动态文件模板
+templates:
+  - files:
+    - src: conf/service.yml.j2
+      dest: conf/service.yml
+    keys:
+      - file:conf/templates/{{ cluster_name }}.yml
+      - config/{{ service_name }}/{{ cluster_name }}/
+
+# 服务发现
+discovery:
+  - listen_port: {{ listen_port }}
+    keys:
+      - sd/{{ service_name }}/{{ cluster_name }}/{{ ansible_host | default('127.0.0.1') }}:{{ service_port | default(listen_port) }}
+    ttl: 1

@@ -1,0 +1,10 @@
+log/
+.vscode
+__pycache__
+data/
+.pytest_cache
+ita/
+build/
+
+*.py[cod]
+conf/service.yml
