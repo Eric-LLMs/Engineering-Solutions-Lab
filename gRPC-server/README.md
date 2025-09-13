@@ -44,7 +44,7 @@ python client.py
 ```
 
 # 2. Adding a New Service   
-## To add a new gRPC service implementation, follow these steps:
+### To add a new gRPC service implementation, follow these steps:
 - Create a new service implementation under the directory:
 ``` 
   gRPC-server/ita/inventory/services/  
